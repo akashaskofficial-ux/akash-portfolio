@@ -168,6 +168,12 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .hero-cells i{position:relative;display:block;transform-style:preserve-3d}
 .hero-cells .flip{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .8s var(--ease)}
 .hero-cells i.on .flip{transform:rotateY(180deg)}
+/* Safari does not always hide back faces here, so each face also hides itself at the edge-on moment of the flip
+   (about .1s into the .8s ease-out turn) instead of relying on backface-visibility alone */
+.hero-cells .bk{opacity:0;transition:opacity 0s .1s}
+.hero-cells i.on .bk{opacity:1}
+.hero-cells .f{transition:opacity 0s .1s}
+.hero-cells i.on .f{opacity:0}
 .hero-cells .f,.hero-cells .bk{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden}
 .hero-cells .f{border:1px solid #DCFFE5;background:url(img/hero/cell.svg) center/100% 100% no-repeat;background-origin:border-box;box-shadow:0 calc(var(--lift,0) * 26px) calc(var(--lift,0) * 60px) rgba(17,37,41,calc(var(--lift,0) * .38))}
 .hero-cells .bk{inset:1px;transform:rotateY(180deg);border-radius:calc(12.4 * var(--u));background:var(--neon);color:var(--deep-500);display:grid;place-items:center;font:400 clamp(14px,calc(26 * var(--u)),30px)/1 var(--f-pixel);letter-spacing:-.02em}
@@ -1564,7 +1570,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
         const ax = x + hr.left, ay = y + hr.top;
         c.classList.toggle('plain', blockers.some(b => ax < b.right - 4 && ax + cw > b.left + 4 && ay < b.bottom - 4 && ay + ch > b.top + 4));
         const layers = ['url(img/hero/cell.svg) center/100% 100% no-repeat'];
-        if (!lite) layers.push(`url("${src}") ${(px - x).toFixed(1)}px ${(py - y).toFixed(1)}px/${pw}px ${ph}px no-repeat`);
+        layers.push(`url("${src}") ${(px - x).toFixed(1)}px ${(py - y).toFixed(1)}px/${pw}px ${ph}px no-repeat`);
         layers.push(`${GRAD} ${(-x).toFixed(1)}px ${(-y).toFixed(1)}px/${hw}px ${hh}px no-repeat`, `${LIN} ${(-x).toFixed(1)}px ${(-y).toFixed(1)}px/${hw}px ${hh}px no-repeat`);
         c.querySelector('.f').style.background = layers.join(',');
       });
