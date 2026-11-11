@@ -400,6 +400,9 @@ body.no-dust .dust{opacity:0}
 .about.held-cord #idStrapHit{cursor:grabbing}
 .idc{position:absolute;left:0;top:0;width:var(--w);aspect-ratio:300/430;transform-origin:50% 0;will-change:transform;cursor:grab;touch-action:none;pointer-events:auto}
 .idc.held{cursor:grabbing}
+/* fingers: an up/down swipe over the card or its cord scrolls the page; sideways or hold-then-drag moves the card */
+.id-hint .h-touch{display:none}
+@media (pointer:coarse){.idc,#idStrapHit{touch-action:pan-y}.id-hint .h-fine{display:none}.id-hint .h-touch{display:inline}}
 .idc-face{position:absolute;inset:0;border-radius:18px;overflow:hidden;background:linear-gradient(155deg,#183236 0%,var(--deep-500) 45%,var(--deep-700) 100%);box-shadow:inset 0 0 0 1px rgba(200,255,217,.14),0 30px 50px -22px rgba(5,12,13,.55),0 10px 18px -10px rgba(5,12,13,.4);padding:calc(var(--w) * .07);display:flex;flex-direction:column;color:var(--neon-100)}
 .idc-slot{position:absolute;left:50%;top:calc(var(--w) * .035);width:18%;height:3%;transform:translateX(-50%);border-radius:99px;background:var(--neon-50);box-shadow:inset 0 2px 3px rgba(5,12,13,.35)}
 .idc-clip{position:absolute;left:50%;top:-30px;width:20px;height:42px;transform:translateX(-50%);z-index:3;border-radius:6px 6px 4px 4px;background:linear-gradient(90deg,#8FA6A9,#E6F1F2 45%,#9DB2B5 70%,#6E8487);box-shadow:0 2px 3px rgba(5,12,13,.35)}
@@ -457,6 +460,12 @@ body.no-dust .dust{opacity:0}
 .tc-glow{position:absolute;inset:0;opacity:var(--h);background:radial-gradient(340px circle at var(--mx) var(--my),rgba(94,255,136,.16),rgba(94,255,136,0) 70%)}
 .tc-edge{position:absolute;inset:-1px;border-radius:inherit;padding:1px;opacity:var(--h);pointer-events:none;background:radial-gradient(280px circle at var(--mx) var(--my),var(--neon),rgba(94,255,136,0) 72%);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+/* touch screens: a live backdrop blur over the moving light is the heaviest thing on the page, and the hover
+   layers never show without a mouse. Use a denser glass instead and drop those layers. */
+@media (hover:none), (pointer:coarse){
+  .tcard{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(9,22,25,.8)}
+  .tc-sharp,.tc-glow,.tc-edge{display:none}
+}
 .tc-body{position:absolute;inset:0;display:flex;flex-direction:column;align-items:flex-start;padding:3.35cqw 5.46cqw 6cqw;transform:translate3d(calc(var(--ry) * .5px),calc(var(--rx) * -.5px),0)}
 .tc-mark{display:block;height:11.27cqw;margin-bottom:.7cqw;font:300 11.27cqw/1 var(--f-body);letter-spacing:-.03em;color:var(--neon);transform-origin:20% 60%;transform:translate3d(calc(var(--ry) * .9px),calc(var(--rx) * -.9px),0) rotate(calc(var(--h) * -8deg)) scale(calc(1 + var(--h) * .16))}
 .tc-quote{margin:0;font:300 max(4.93cqw,16px)/1.214 var(--f-body);letter-spacing:-.03em;color:var(--white)}
@@ -920,7 +929,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
           <div class="fact"><span class="eyebrow">Local time</span><b id="clock2">--:--</b></div>
         </div>
       </div>
-      <div class="id-spot" id="idSpot"><p class="id-hint" aria-hidden="true">Grab the card or pull the cord</p></div>
+      <div class="id-spot" id="idSpot"><p class="id-hint" aria-hidden="true"><span class="h-fine">Grab the card or pull the cord</span><span class="h-touch">Swipe the card sideways, or hold and drag</span></p></div>
     </div>
   </div>
 
@@ -1310,14 +1319,18 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
     const N = slots.length; stage.style.setProperty('--n', N);
     if (RM) { sec.classList.add('static'); return; }
     const cl = x => Math.max(0, Math.min(1, x)), out3 = x => 1 - Math.pow(1 - cl(x), 3), sm = x => { x = cl(x); return x * x * (3 - 2 * x); };
-    const ctx = cv.getContext('2d'); let W = 0, H = 0, live = false, T = 0, Ts = -9, lastT = 0, vel = 0, gS = 0, t0 = performance.now();
+    const ctx = cv.getContext('2d'); let W = 0, H = 0, live = false, T = 0, Ts = -9, lastT = 0, vel = 0, gS = 0, gLast = '', t0 = performance.now();
     let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
     // far, mid, near: neon-700, neon, neon-200. Near beams are fewer, wider, brighter and move the most.
-    const LAYERS = [{ d: .3, n: 90, rgb: '42,155,92', a: .6, w: 1.2 }, { d: .62, n: 60, rgb: '94,255,136', a: .56, w: 1.6 }, { d: 1, n: 34, rgb: '152,254,184', a: .7, w: 2.6 }];
+    // touch screens (no hover): the light is soft, so draw it at a lower resolution with fewer, wider beams
+    const TOUCH = !matchMedia('(hover:hover) and (pointer:fine)').matches;
+    const LAYERS = TOUCH
+      ? [{ d: .3, n: 36, rgb: '42,155,92', a: .7, w: 1.6 }, { d: .62, n: 26, rgb: '94,255,136', a: .62, w: 2 }, { d: 1, n: 16, rgb: '152,254,184', a: .78, w: 3 }]
+      : [{ d: .3, n: 90, rgb: '42,155,92', a: .6, w: 1.2 }, { d: .62, n: 60, rgb: '94,255,136', a: .56, w: 1.6 }, { d: 1, n: 34, rgb: '152,254,184', a: .7, w: 2.6 }];
     // wide soft shafts behind the lines give the light some volume
-    const SHAFTS = Array.from({ length: 16 }, () => ({ x: (rnd() + rnd()) - 1, w: 50 + rnd() * 130, h: .55 + rnd() * .6, a: .05 + rnd() * .07, sp: .5 + rnd(), ph: rnd() * 6.28 }));
+    const SHAFTS = Array.from({ length: TOUCH ? 8 : 16 }, () => ({ x: (rnd() + rnd()) - 1, w: 50 + rnd() * 130, h: .55 + rnd() * .6, a: .05 + rnd() * .07, sp: .5 + rnd(), ph: rnd() * 6.28 }));
     LAYERS.forEach(L => L.b = Array.from({ length: L.n }, () => { const g = (rnd() + rnd() + rnd()) / 3 * 2 - 1; return { x: g, h: .3 + rnd() * .7, w: .6 + rnd() * .9, sp: .6 + rnd() * 1.4, ph: rnd() * 6.28, a: .35 + rnd() * .65 }; }));
-    const size = () => { const d = Math.min(1.5, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
+    const size = () => { const d = TOUCH ? .5 : Math.min(1.5, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
     const hov = slots.map(s => {
       const c = $('.tcard', s), o = { c, rx: 0, ry: 0, h: 0, mx: 50, my: 50, trx: 0, try: 0, th: 0, tmx: 50, tmy: 50 };
       c.addEventListener('pointermove', e => { const r = c.getBoundingClientRect(), nx = (e.clientX - r.left) / r.width, ny = (e.clientY - r.top) / r.height; o.trx = (.5 - ny) * 11; o.try = (nx - .5) * 13; o.tmx = nx * 100; o.tmy = ny * 100; o.th = 1; });
@@ -1349,13 +1362,16 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
         }
         const ox = (i % 2 ? 1 : -1) * step * (1 - Math.abs(d) * .5);
         s.style.transform = `translate3d(${ox.toFixed(1)}px,calc(-50% + ${y.toFixed(1)}px),0) rotateX(${(d * 30).toFixed(2)}deg) rotateY(${((i % 2 ? -1 : 1) * (step ? 9 : 0) * d).toFixed(2)}deg) scale(${(1 - Math.min(.14, Math.abs(d) * .3)).toFixed(4)})`;
-        c.style.opacity = op.toFixed(3); s.style.visibility = op > .004 ? 'visible' : 'hidden';
-        s.style.setProperty('--lit', (Math.max(0, d) * 1.5 + .25 * op).toFixed(3));
-        s.style.zIndex = i + 1; s.style.pointerEvents = Math.abs(d) < .1 ? 'auto' : 'none';
+        // write only what changed: every style write here restyles a large glass card
+        const k = s.__k || (s.__k = {}), opT = op.toFixed(2), vis = op > .004 ? 'visible' : 'hidden', lit = (Math.max(0, d) * 1.5 + .25 * op).toFixed(2), pe = Math.abs(d) < .1 ? 'auto' : 'none';
+        if (k.op !== opT) c.style.opacity = k.op = opT;
+        if (k.vis !== vis) s.style.visibility = k.vis = vis;
+        if (k.lit !== lit) s.style.setProperty('--lit', k.lit = lit);
+        if (k.pe !== pe) { s.style.pointerEvents = k.pe = pe; s.style.zIndex = i + 1; }
         if (op > .01) waves.push([rest + y, op, ox]);
       });
-      cardsEl.style.setProperty('--g', gS.toFixed(3));
-      hov.forEach(o => {
+      const gTxt = gS.toFixed(2); if (gTxt !== gLast) { gLast = gTxt; cardsEl.style.setProperty('--g', gTxt); }   // only restyle the cards when the glow changes
+      if (!TOUCH) hov.forEach(o => {
         o.rx += (o.trx - o.rx) * .1; o.ry += (o.try - o.ry) * .1; o.h += (o.th - o.h) * .09; o.mx += (o.tmx - o.mx) * .18; o.my += (o.tmy - o.my) * .18;
         const st = o.c.style; st.setProperty('--rx', o.rx.toFixed(2)); st.setProperty('--ry', o.ry.toFixed(2)); st.setProperty('--h', o.h.toFixed(3)); st.setProperty('--mx', o.mx.toFixed(1) + '%'); st.setProperty('--my', o.my.toFixed(1) + '%');
       });
@@ -1471,34 +1487,65 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
       d += ` L${cx.toFixed(1)} ${cy.toFixed(1)}`;
       strap.setAttribute('d', d); hit.setAttribute('d', d);
     };
+    let still = 0;
     const frame = now => {
       if (!run) return;
       acc += Math.min(.05, (now - last) / 1000); last = now;
       while (acc >= DT) { step(); acc -= DT; }
-      render(); requestAnimationFrame(frame);
+      render();
+      // once the card has come to rest, stop simulating until someone touches it again
+      let mv = 0; for (const p of pts) mv = Math.max(mv, Math.abs(p.x - p.px) + Math.abs(p.y - p.py));
+      still = !grab && mv < .02 ? still + 1 : 0;
+      if (still > 45) { run = false; return; }
+      requestAnimationFrame(frame);
     };
-    const start = () => { if (run || RM) return; run = true; last = performance.now(); requestAnimationFrame(frame); };
+    const start = () => { still = 0; if (run || RM) return; run = true; last = performance.now(); requestAnimationFrame(frame); };
     const settle = () => { measure(); place(false); for (let i = 0; i < 80; i++) solve(); render(); };
     settle();
     if (RM) { addEventListener('resize', settle); return; }
     const local = e => { const r = stage.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
-    const take = (el, e, g) => { grab = g; el.setPointerCapture(e.pointerId); sec.classList.add('touched'); start(); };
-    card.addEventListener('pointerdown', e => {
-      const m = local(e), P = pts[N], Q = pts[N + 1], ux = Q.x - P.x, uy = Q.y - P.y;
-      const tt = Math.max(0, Math.min(1, ((m.x - P.x) * ux + (m.y - P.y) * uy) / (ux * ux + uy * uy)));
-      card.classList.add('held'); take(card, e, { x: m.x, y: m.y, t: tt });
-    });
-    hit.addEventListener('pointerdown', e => {
-      const m = local(e); let k = 1, best = Infinity;
+    const take = (el, id, g) => { grab = g; try { el.setPointerCapture(id); } catch (_) {} sec.classList.add('touched'); start(); };
+    const grabCard = m => { const P = pts[N], Q = pts[N + 1], ux = Q.x - P.x, uy = Q.y - P.y;
+      card.classList.add('held'); return { x: m.x, y: m.y, t: Math.max(0, Math.min(1, ((m.x - P.x) * ux + (m.y - P.y) * uy) / (ux * ux + uy * uy))) }; };
+    const grabCord = m => { let k = 1, best = Infinity;
       for (let i = 1; i <= N; i++) { const dd = Math.hypot(pts[i].x - m.x, pts[i].y - m.y); if (dd < best) { best = dd; k = i; } }
-      sec.classList.add('held-cord'); take(hit, e, { x: m.x, y: m.y, k });
-    });
-    const move = e => { if (grab) { const m = local(e); grab.x = m.x; grab.y = m.y; } };
-    const drop = () => { grab = null; card.classList.remove('held'); sec.classList.remove('held-cord'); };
-    [card, hit].forEach(el => { el.addEventListener('pointermove', move); el.addEventListener('pointerup', drop); el.addEventListener('pointercancel', drop); });
+      sec.classList.add('held-cord'); return { x: m.x, y: m.y, k }; };
+    // Mouse and pen grab at once. A finger on the card or cord must still scroll the page (CSS gives them
+    // touch-action: pan-y), so a touch only grabs on a sideways drag or after a short hold; an upward or
+    // downward swipe goes to the page as usual, and a quick tap just gives the card a swing.
+    let pend = null;
+    const commit = () => { const p = pend; pend = null; clearTimeout(p.tm); take(p.el, p.id, p.make(local(p))); };
+    const begin = (el, make) => e => {
+      if (e.pointerType !== 'touch') { take(el, e.pointerId, make(local(e))); return; }
+      if (pend) clearTimeout(pend.tm);
+      pend = { el, make, id: e.pointerId, clientX: e.clientX, clientY: e.clientY, tm: setTimeout(() => { if (pend && pend.id === e.pointerId) commit(); }, 300) };
+    };
+    card.addEventListener('pointerdown', begin(card, grabCard));
+    hit.addEventListener('pointerdown', begin(hit, grabCord));
+    const move = e => {
+      if (pend && e.pointerId === pend.id) {
+        const dx = e.clientX - pend.clientX, dy = e.clientY - pend.clientY;
+        if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.2) commit();          // sideways: take the card
+        else if (Math.abs(dy) > 10) { clearTimeout(pend.tm); pend = null; return; }  // up or down: the page scrolls
+        else return;
+      }
+      if (grab) { const m = local(e); grab.x = m.x; grab.y = m.y; }
+    };
+    const drop = e => {
+      if (pend && e.pointerId === pend.id) {   // a tap: a little swing, nothing more
+        clearTimeout(pend.tm); pend = null;
+        if (e.type === 'pointerup') { pts[N + 1].px -= 6 * (Math.random() < .5 ? -1 : 1); sec.classList.add('touched'); start(); }
+        return;
+      }
+      grab = null; card.classList.remove('held'); sec.classList.remove('held-cord');
+    };
+    addEventListener('pointermove', move, { passive: true });
+    addEventListener('pointerup', drop); addEventListener('pointercancel', drop);
+    // while the card is held, the finger moves the card and not the page
+    [card, hit].forEach(el => el.addEventListener('touchmove', e => { if (grab && e.cancelable) e.preventDefault(); }, { passive: false }));
     // a light brush when the cursor passes the card
     card.addEventListener('pointermove', e => { if (!grab && e.pointerType === 'mouse') pts[N + 1].px -= Math.max(-1.5, Math.min(1.5, e.movementX * .03)); });
-    let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { measure(); place(false); }, 120); });
+    let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { measure(); place(false); render(); start(); }, 120); });
     addEventListener('load', () => { if (!dropped) settle(); });
     new IntersectionObserver(es => es.forEach(e => {
       if (e.isIntersecting) { if (!dropped) { dropped = true; measure(); place(true); } start(); } else run = false;
@@ -1514,7 +1561,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
       sec.classList.add('js');
       roads.forEach(r => { r.len = r.path.getTotalLength(); });
       const wide = matchMedia('(min-width:900px)'), cl = x => Math.max(0, Math.min(1, x));
-      let ps = 0, on = false, live = -1;
+      let ps = 0, on = false, live = -1, lastP = -1, lastR = null;
       const target = () => {
         const vh = innerHeight;
         if (wide.matches) { const r = stage.getBoundingClientRect(); return .08 + cl((vh * .8 - r.top) / (vh * .8)) * .19 + cl(-r.top / (r.height - vh) / .9) * .73; }
@@ -1523,6 +1570,9 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
       const frame = () => {
         const R = roads[wide.matches ? 0 : 1], t = target();
         ps += (t - ps) * .14; if (Math.abs(t - ps) < .0004) ps = t;
+        // nothing moved since the last frame: skip the restyle of the whole section
+        if (ps === lastP && R === lastR) { if (on) requestAnimationFrame(frame); return; }
+        lastP = ps; lastR = R;
         sec.style.setProperty('--p', ps.toFixed(4));
         const pt = R.path.getPointAtLength(ps * R.len); R.head.setAttribute('transform', `translate(${pt.x.toFixed(1)},${pt.y.toFixed(1)})`);
         let n = 0; R.at.forEach((a, i) => { const lit = ps >= a - .004; if (lit) n++; psteps[i].classList.toggle('on', lit); roads.forEach(q => q.dots[i].classList.toggle('on', lit)); });
@@ -1737,13 +1787,18 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
   if (!RM) {
     const cv = document.createElement('canvas'); cv.className = 'dust'; cv.setAttribute('aria-hidden', 'true'); document.body.appendChild(cv);
     const ctx = cv.getContext('2d'); let W = 0, H = 0, dpr = 1;
-    const fit = () => { dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); };
+    // soft dots don't need retina pixels; on touch screens draw at 1x
+    const fit = () => { dpr = Math.min(devicePixelRatio || 1, FINE ? 2 : 1); W = innerWidth; H = innerHeight; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); };
     fit(); addEventListener('resize', fit);
     const sprite = rgb => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, `rgba(${rgb},1)`); gr.addColorStop(.16, `rgba(${rgb},.6)`); gr.addColorStop(1, `rgba(${rgb},0)`); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return c; };
     const sprNeon = sprite('94,255,136'), sprPale = sprite('200,255,217');
     const COUNT = innerWidth < 1024 || !FINE ? 90 : 220, pts = [];
     for (let i = 0; i < COUNT; i++) pts.push({ x: (Math.random() - .5) * 2.8, y: (Math.random() - .5) * 2.8, z: Math.random(), s: Math.random() < .07 ? 5 + Math.random() * 7 : 1 + Math.random() * 2.2, seed: Math.random() });
     const tones = $$('[data-tone]');
+    // section bands in page coordinates, measured once (and on resize/load) instead of every frame
+    let tb = [];
+    const measureTones = () => { tb = tones.map(el => { const r = el.getBoundingClientRect(); return [r.top + scrollY, r.bottom + scrollY, el.dataset.tone, el.dataset.dust === 'off']; }); };
+    measureTones(); addEventListener('resize', measureTones); addEventListener('load', measureTones); setInterval(measureTones, 1500);
     let travel = 0, tSm = 0, lastY = scrollY, speed = 0, mx = 0, my = 0, tmx = 0, tmy = 0, lastT = performance.now(), shown = !document.hidden;
     addEventListener('pointermove', e => { tmx = e.clientX / innerWidth * 2 - 1; tmy = e.clientY / innerHeight * 2 - 1; }, { passive: true });
     document.addEventListener('visibilitychange', () => { shown = !document.hidden; lastT = performance.now(); });
@@ -1755,7 +1810,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
       const prev = tSm; tSm += (travel - tSm) * (1 - Math.exp(-6 * dt));
       speed += (Math.min(Math.abs(tSm - prev) / Math.max(dt, .001) / .9, 1) - speed) * (1 - Math.exp(-8 * dt));
       mx += (tmx - mx) * (1 - Math.exp(-3 * dt)); my += (tmy - my) * (1 - Math.exp(-3 * dt));
-      const bands = tones.map(el => { const r = el.getBoundingClientRect(); return [r.top, r.bottom, el.dataset.tone, el.dataset.dust === 'off']; }).filter(b => b[1] > 0 && b[0] < H);
+      const sy0 = scrollY, bands = tb.map(b => [b[0] - sy0, b[1] - sy0, b[2], b[3]]).filter(b => b[1] > 0 && b[0] < H);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
       for (const p of pts) {
         const z = .06 + (((p.z - tSm) % 1 + 1) % 1) * .94, sc = .35 / z;
