@@ -30,6 +30,8 @@
 *{box-sizing:border-box}
 html{background:var(--deep-800)}
 body{margin:0;background:var(--deep-800);color:var(--white);font:400 16px/1.45 var(--f-body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+/* clip, not hidden: Safari stops position:sticky (the pinned Work / Testimonials scenes) under a body with overflow-x:hidden */
+@supports (overflow:clip){body{overflow-x:clip}}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--deep-800)}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
@@ -363,7 +365,9 @@ body.no-dust .dust{opacity:0}
   .ars-gift .spark{left:calc((var(--x) - 331) * var(--m));top:calc((var(--y) - 256) * var(--m));width:calc(var(--w) * var(--m));height:calc(var(--w) * var(--m))}
 }
 
-main{overflow-x:clip}   /* scattered hero tiles must never widen the page */
+/* scattered hero tiles must never widen the page: the hero clips sideways only. (No clip on <main>: iOS Safari
+   can stop the pinned Work / Testimonials / Process stages from sticking inside a clipping wrapper.) */
+.hero.fx{overflow-x:clip;overflow-y:visible}
 /* ---------- ABOUT + hanging ID card ----------
    One left-aligned column of story (head, copy, journey) with the card hanging in a spot on the right.
    The cord drops from the top edge of the section and crosses the heading on its way down. */
@@ -1225,6 +1229,29 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
     });
   };
   if (!RM) { let q = false; addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(() => { workFx(); q = false; }); } }, { passive: true }); addEventListener('resize', workFx); workFx(); }
+
+
+  // pin guard: some mobile browsers drop position:sticky. If a pinned stage's scene is not where sticky would
+  // put it, switch that scene to a JS pin (a transform that cancels the scroll) so the stage never shows empty.
+  {
+    const pins = [['.works-stage', '.works-sticky'], ['.t-stage', '.t-sticky'], ['.pr-stage', '.pr-sticky']]
+      .map(([a, b]) => ({ st: $(a), sk: $(b), js: false })).filter(o => o.st && o.sk);
+    // move pinned scenes that have switched to the JS pin
+    const follow = () => { for (const o of pins) if (o.js) { const r = o.st.getBoundingClientRect(); o.sk.style.transform = `translate3d(0,${Math.max(0, Math.min(-r.top, r.height - o.sk.offsetHeight)).toFixed(1)}px,0)`; } };
+    // check only once scrolling pauses (WebKit reports stale sticky positions mid-scroll); switch after two misses in a row
+    const check = () => {
+      for (const o of pins) {
+        if (o.js || getComputedStyle(o.sk).position !== 'sticky') continue;
+        const r = o.st.getBoundingClientRect(), want = Math.max(0, Math.min(-r.top, r.height - o.sk.offsetHeight));
+        if (want < 40 || r.bottom < innerHeight) { o.miss = 0; continue; }
+        const got = o.sk.getBoundingClientRect().top - r.top;
+        o.miss = Math.abs(got - want) > 8 ? (o.miss || 0) + 1 : 0;
+        if (o.miss >= 2) { o.js = true; o.sk.style.position = 'relative'; o.sk.style.willChange = 'transform'; follow(); }
+      }
+    };
+    let ct; const onScroll = () => { follow(); clearTimeout(ct); ct = setTimeout(() => { check(); setTimeout(check, 350); }, 250); };
+    addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onScroll);
+  }
 
   // tools: the gift waits closed in the middle of the section. Clicking it pops the lid, the box settles down
   // to its Figma spot and the tools pop out of the mouth to their places. Click again to wrap them up.
