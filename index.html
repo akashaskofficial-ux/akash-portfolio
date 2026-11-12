@@ -249,8 +249,7 @@ body.no-dust .dust{opacity:0}
 .work-list{position:absolute;inset:0;z-index:1;perspective:1800px}
 .work-list .work-card{position:absolute;left:50%;top:50%;width:min(1080px,74vw,calc((100svh - 190px) * 1176 / 633));margin:0;
   transform:translate(-50%,-50%) translate3d(var(--x,0px),var(--y,0px),0) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(var(--s,1));opacity:var(--o,1);transform-origin:50% 50%}
-.work-card{position:relative;display:block;color:var(--white);aspect-ratio:1176/633;border-radius:16px;overflow:hidden;will-change:transform;background:linear-gradient(180deg,#0E1F22,#387C88)}
-.work-card.g2{background:linear-gradient(180deg,#007862,#00250A)}
+.work-card{position:relative;display:block;color:var(--white);aspect-ratio:1176/633;border-radius:16px;overflow:hidden;will-change:transform;background:linear-gradient(180deg,#007862,#00250A)}
 .work-card .panel{position:absolute;left:41.667%;top:4.107%;width:55.952%;height:91.627%;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.7)),#0E1F22}
 .work-card .panel img{position:absolute;left:-14.1%;top:-9%;width:128.2%;height:118%;object-fit:cover;display:block;transform:translate3d(0,var(--iy,0px),0) scale(var(--is,1));transition:transform .9s var(--ease)}
 .work-card.fit .panel img{left:0;width:100%;top:-6%;height:112%}
@@ -260,7 +259,6 @@ body.no-dust .dust{opacity:0}
 .work-card .sub{margin:0;font:400 14px/18.9px var(--f-body);color:rgba(255,255,255,.42)}
 .work-card .btn{position:absolute;left:32px;bottom:59px;height:44px;padding-left:18px}
 .work-card .btn .chip{width:36px;height:36px;border-radius:9px}
-.work-card:hover h3,.work-card:focus-visible h3{color:var(--neon)}
 .work-card:hover .btn,.work-card:focus-visible .btn{transform:translateY(-2px);box-shadow:0 6px 0 var(--edge),0 18px 30px -12px rgba(42,155,92,.8),inset 0 1px 0 rgba(255,255,255,.55)}
 .work-card:hover .btn .lbl,.work-card:focus-visible .btn .lbl{transform:translateY(-100%)}
 .work-card:hover .btn .arw svg:first-child{transform:translate(170%,0)}
@@ -713,6 +711,17 @@ body.no-dust .dust{opacity:0}
 html.intro .hero-copy,html.intro .hero .letters,html.intro .hero .tile,html.intro .hero .scroll-cue{opacity:0!important}
 html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,html.intro-t .hero .scroll-cue{transition:opacity .9s var(--ease)}
 @media (max-width:560px){ .ld-track{height:14px;margin-top:26px} .ld-row{font-size:11px} }
+
+/* desktop: the cursor becomes the View work button over a card */
+.vw-cur{position:fixed;left:0;top:0;z-index:90;pointer-events:none;opacity:0;transform:translate3d(var(--cx,-200px),var(--cy,-200px),0) translate(-50%,-50%) scale(.4);transition:opacity .2s var(--ease),transform .25s var(--ease)}
+.vw-cur.on{opacity:1;transform:translate3d(var(--cx),var(--cy),0) translate(-50%,-50%) scale(1)}
+.vw-cur .btn{box-shadow:0 6px 0 var(--edge),0 18px 30px -12px rgba(42,155,92,.8),inset 0 1px 0 rgba(255,255,255,.55)}
+@media (hover:hover) and (pointer:fine){
+  .work-card{cursor:none}
+  .work-card .btn{display:none}
+  .work-card:focus-visible .btn{display:inline-flex}
+}
+@media (prefers-reduced-motion:reduce){.vw-cur{transition:opacity .15s}}
 </style>
 </head>
 <body>
@@ -845,17 +854,17 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
         <div class="txt"><span class="no">01</span><h3>Spatial Design for Enterprise AI Intelligence</h3><p class="sub">Enterprise AI, spatial UI · Interface system designer</p></div>
         <span class="btn ghost"><span class="pill"><span class="lbl" data-t="View work">View work</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg></span></span></span>
       </a>
-      <a class="work-card g2 fit" href="case-studies/wind-scada.html" data-dir="-1" data-speed="1.35">
+      <a class="work-card fit" href="case-studies/wind-scada.html" data-dir="-1" data-speed="1.35">
         <div class="panel"><img src="img/works/fleetpro.jpg" alt="FleetPro turbine overview screen on a tablet: nacelle diagram, pitch gauges and an active-errors list" loading="lazy"></div>
         <div class="txt"><span class="no">02</span><h3>Industrial Windmill Monitoring System</h3><p class="sub">Wind-farm SCADA platform · Product designer, design system owner</p></div>
         <span class="btn ghost"><span class="pill"><span class="lbl" data-t="View work">View work</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg></span></span></span>
       </a>
       <a class="work-card fit" href="case-studies/ai-consultancy.html" data-dir="1" data-speed="0.85">
         <div class="panel"><img src="img/works/ai-consultancy.jpg" alt="Enterprise AI consultancy website homepage on a laptop" loading="lazy"></div>
-        <div class="txt"><span class="no">03</span><h3>Brand and website for an enterprise AI consultancy</h3><p class="sub">Web Design · Logo · brand guidelines · page templates · mobile layouts</p></div>
+        <div class="txt"><span class="no">03</span><h3>Brand and website for an enterprise AI consultancy</h3><p class="sub">Enterprise AI, brand and web · Lead designer</p></div>
         <span class="btn ghost"><span class="pill"><span class="lbl" data-t="View work">View work</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg></span></span></span>
       </a>
-      <a class="work-card g2 fit" href="case-studies/blii.html" data-dir="-1" data-speed="1.2">
+      <a class="work-card fit" href="case-studies/blii.html" data-dir="-1" data-speed="1.2">
         <div class="panel"><img src="img/works/blii.jpg" alt="Blii mobile screens: AI chat summary, home with smart prompts, and all saves by topic" loading="lazy"></div>
         <div class="txt"><span class="no">04</span><h3>A chat that remembers everything you save</h3><p class="sub">AI knowledge app, iOS · Solo designer, end to end</p></div>
         <span class="btn ghost"><span class="pill"><span class="lbl" data-t="View work">View work</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg></span></span></span>
@@ -1888,6 +1897,26 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
   views.forEach(v => vio.observe(v.cv));
   addEventListener('resize', () => views.forEach(v => { v.c = setup(v.cv); draw[v.kind](v.c, performance.now(), v.cv); }));
   if (!RM) { const loop = t => { views.forEach(v => { if (v.visible) draw[v.kind](v.c, t, v.cv); }); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+})();
+</script>
+
+<div class="vw-cur" aria-hidden="true"><span class="btn"><span class="pill"><span class="lbl">View work</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg></span></span></span></div>
+<script>
+(() => {
+  const mq = matchMedia('(hover: hover) and (pointer: fine)'), cur = document.querySelector('.vw-cur');
+  if (!cur) return;
+  let x = -200, y = -200, raf = 0;
+  const check = () => {
+    raf = 0;
+    if (!mq.matches) { cur.classList.remove('on'); return; }
+    const el = document.elementFromPoint(x, y), over = !!(el && el.closest('.work-card'));
+    cur.style.setProperty('--cx', x + 'px'); cur.style.setProperty('--cy', y + 'px');
+    cur.classList.toggle('on', over);
+  };
+  const queue = () => { if (!raf) raf = requestAnimationFrame(check); };
+  addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; x = e.clientX; y = e.clientY; queue(); }, { passive: true });
+  addEventListener('scroll', queue, { passive: true });
+  document.documentElement.addEventListener('pointerleave', () => cur.classList.remove('on'));
 })();
 </script>
 
