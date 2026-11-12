@@ -746,6 +746,10 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
 <script>
 (function () {
   var root = document.documentElement, ld = document.getElementById('loader');
+  // already played in this tab (e.g. back from a case study): show the page straight away
+  var seen = false; try { seen = sessionStorage.getItem('ld-seen') === '1'; } catch (e) {}
+  if (seen) { ld.remove(); return; }
+  try { sessionStorage.setItem('ld-seen', '1'); } catch (e) {}
   var nEl = document.getElementById('ldN'), cEl = document.getElementById('ldC'), bar = document.getElementById('ldBar');
   root.classList.add('intro'); root.style.overflow = 'hidden';
   // real progress: fonts, then the full page load. A short minimum keeps the count readable; a cap stops it hanging.
@@ -1138,7 +1142,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
   // loading screen hand-off: split the dark screen into the hero's tile grid and clear it corner to corner
   {
     const root = document.documentElement, ld = $('#loader');
-    if (ld && root.classList.contains('intro') && window.__lenis) window.__lenis.stop();
+    if (ld && ld.isConnected && root.classList.contains('intro') && window.__lenis) window.__lenis.stop();
     const unlock = () => { if (!$('#nav').classList.contains('menu-open')) { root.style.overflow = ''; if (window.__lenis) window.__lenis.start(); } };
     window.__reveal = () => {
       const heroEl = $('#top'), first = cells.firstElementChild;
