@@ -686,5 +686,18 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
   });
 })();
 </script>
+<script>
+(() => {
+  const top = document.getElementById('top');
+  document.querySelectorAll('a.totop').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault();
+    const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (window.lenis && window.lenis.scrollTo) window.lenis.scrollTo(0, { immediate: !smooth });
+    else window.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' });
+    const f = top && top.querySelector('a, button');
+    if (f) setTimeout(() => f.focus({ preventScroll: true }), smooth ? 700 : 0);
+  }));
+})();
+</script>
 </body>
 </html>
