@@ -555,6 +555,56 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
  .phones li{flex:0 0 62%;scroll-snap-align:start}
  .phones li:nth-child(2){margin-top:0}
 }
+</style><style>
+.pz{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(16px,2.4vw,28px);align-items:stretch}
+.pz-map{position:relative;aspect-ratio:1/1;border-radius:24px;overflow:hidden;background:radial-gradient(120% 90% at 85% 10%,rgba(94,255,136,.10),rgba(94,255,136,0) 55%),#07141a;color:#E8F3EE}
+.pz-grid{position:absolute;inset:44px 20px 52px 52px}
+.pz-grid::before,.pz-grid::after{content:"";position:absolute;background:rgba(232,243,238,.14)}
+.pz-grid::before{left:50%;top:0;bottom:0;width:1px}
+.pz-grid::after{top:50%;left:0;right:0;height:1px}
+.pz-zone{position:absolute;left:50%;top:0;right:0;bottom:50%;border-radius:18px;border:1.5px dashed rgba(94,255,136,.0);background:rgba(94,255,136,0);transition:background .9s var(--ease) .9s,border-color .9s var(--ease) .9s}
+.pz.in .pz-zone{background:rgba(94,255,136,.08);border-color:rgba(94,255,136,.55)}
+.pz-q{position:absolute;font:500 11px/1.3 var(--f-mono);letter-spacing:.02em;color:rgba(232,243,238,.55);max-width:44%}
+.pz-q.tl{left:10px;top:10px}.pz-q.br{right:10px;bottom:10px;text-align:right}.pz-q.bl{left:10px;bottom:10px}
+.pz-q.tr{right:10px;top:10px;text-align:right;color:var(--neon);opacity:0;transition:opacity .6s var(--ease) 1.4s}
+.pz.in .pz-q.tr{opacity:1}
+.pz-ax{position:absolute;font:500 11px/1 var(--f-mono);color:rgba(232,243,238,.7)}
+.pz-ax.x{left:52px;right:20px;bottom:18px;display:flex;justify-content:space-between}
+.pz-ax.y{left:16px;top:44px;bottom:52px;display:flex;flex-direction:column-reverse;justify-content:space-between;writing-mode:vertical-rl;transform:rotate(180deg)}
+.pz-c{position:absolute;transform:translate(-50%,-50%)}
+.pz-c i{position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(232,243,238,.38);transform:translate(-50%,-50%) scale(0);transition:transform .5s cubic-bezier(.3,1.5,.5,1)}
+.pz.in .pz-c i{transform:translate(-50%,-50%) scale(1)}
+.pz-c b{position:absolute;left:50%;top:calc(100% + 42px);transform:translateX(-50%);white-space:nowrap;font:500 13px/1.25 var(--f-body);color:rgba(232,243,238,.85);text-align:center;opacity:0;transition:opacity .5s var(--ease) .5s}
+.pz.in .pz-c b{opacity:1}
+.pz-me{position:absolute;left:50%;top:50%;width:0;height:0;transition:left 1.1s cubic-bezier(.65,0,.25,1) .7s,top 1.1s cubic-bezier(.65,0,.25,1) .7s}
+.pz.in .pz-me{left:75%;top:25%}
+.pz-me i{position:absolute;left:-13px;top:-13px;width:26px;height:26px;border-radius:50%;background:var(--neon);box-shadow:0 0 0 3px #07141a,0 0 0 5px var(--neon),0 0 28px 6px rgba(94,255,136,.55);transform:scale(.4);opacity:0;transition:transform .5s var(--ease) .5s,opacity .3s .5s}
+.pz.in .pz-me i{transform:scale(1);opacity:1}
+.pz-me i::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--neon);opacity:0}
+.pz.in .pz-me i::after{animation:pzping 2.4s cubic-bezier(.2,.6,.3,1) 1.9s infinite}
+@keyframes pzping{0%{transform:scale(.8);opacity:.9}100%{transform:scale(2.6);opacity:0}}
+.pz-me b{position:absolute;left:50%;top:26px;transform:translateX(-50%);white-space:nowrap;padding:6px 10px;border-radius:999px;background:var(--neon);color:#07141a;font:500 12px/1 var(--f-mono);opacity:0;transition:opacity .5s var(--ease) 1.8s}
+.pz.in .pz-me b{opacity:1}
+.pz-side{display:grid;grid-template-rows:auto 1fr;gap:clamp(12px,2vw,20px)}
+.pz-line{padding:clamp(20px,2.6vw,30px);border-radius:24px;background:var(--neon);color:#07141a;display:grid;gap:14px;align-content:start}
+.pz-line span{font:500 11px/1.2 var(--f-mono);opacity:.75}
+.pz-line strong{font:500 clamp(24px,2.7vw,34px)/1.08 "Archivo",var(--f-body);letter-spacing:-.02em}
+.pz-pil{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pz-pil li{padding:16px;border-radius:18px;background:var(--white);border:1px solid var(--line);display:grid;gap:8px;align-content:space-between;font-size:15px;line-height:1.3;opacity:0;transform:translateY(12px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.pz-pil li em{font:500 11px/1 var(--f-mono);font-style:normal;color:var(--neon-900)}
+.pz.in .pz-pil li{opacity:1;transform:none}
+.pz.in .pz-pil li:nth-child(1){transition-delay:1.9s}.pz.in .pz-pil li:nth-child(2){transition-delay:2.0s}.pz.in .pz-pil li:nth-child(3){transition-delay:2.1s}.pz.in .pz-pil li:nth-child(4){transition-delay:2.2s}
+@media (max-width:899px){
+ .pz{grid-template-columns:1fr}
+ .pz-grid{inset:40px 14px 46px 40px}
+ .pz-ax.x{left:40px;right:14px;bottom:16px}.pz-ax.y{left:12px;top:40px;bottom:46px}
+ .pz-c b{font-size:12px;top:calc(100% + 40px)}
+ .pz-q{font-size:10px}
+ .pz-me b{font-size:11px}
+ .pz-grid > .pz-c:nth-of-type(3){top:64%!important}
+ .pz-grid > .pz-c:nth-of-type(2){top:24%!important}
+}
+@media (prefers-reduced-motion:reduce){.pz *,.pz *::after{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
@@ -612,11 +662,16 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 <section class="slide" aria-labelledby="s-d1"><div class="split"><div><p class="eb">Decision 1</p><h2 id="s-d1">Workshops before any design.</h2></div><div class="split-r"><p>Before drawing a screen I ran two days of workshops with the leadership team. Day one covered growth focus, the gap between how the brand is seen and how it should be seen, personality, audiences and a future headline. Day two covered positioning, references, the trust and conversion journey and a longer-term roadmap. I synthesised it into a twelve-section insights deck that every later decision points back to.</p></div></div></section>
 <section class="slide visual" aria-label="Decision 1: The workshop board"><p class="eb">Two days, one board</p><figure class="fig"><div class="vid"><video class="vid-v" src="../img/case-studies/ai-workshop.mp4" poster="../img/case-studies/ai-workshop-poster.webp" width="1280" height="832" muted loop playsinline preload="metadata" aria-label="A slow pan across the workshop board: clusters of sticky notes and exercise templates from two days of sessions. The content is blurred."></video><button class="vid-pp" type="button" aria-label="Pause video"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path class="i-pause" d="M3 2h3v10H3zM8 2h3v10H8z" fill="currentColor"/><path class="i-play" d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg></button></div><figcaption>The workshop board, blurred on purpose: what stakeholders said stays private.</figcaption></figure></section>
 <section class="slide" aria-labelledby="s-d2"><div class="split"><div><p class="eb">Decision 2</p><h2 id="s-d2">Sit between strategy and execution.</h2></div><div class="split-r"><p>Benchmarking across four groups of competitors showed a gap. Strategic consultancies advise but rarely ship; low-cost vendors ship but rarely shape the problem. The client does both, so the positioning became: turn complex AI ideas into production-ready products. Four pillars back it up: deep AI expertise, end-to-end ownership, delivery excellence and strong engineering talent.</p></div></div></section>
-<section class="slide visual" aria-label="Decision 2: Positioning map"><p class="eb">Where the client sits</p><figure class="fig"><div class="mx" role="img" aria-label="Positioning map: strategy depth on one axis, hands-on execution on the other. Strategic consultancies sit high on strategy and low on execution, low-cost vendors the opposite, and the client is placed where both are high."><div class="mx-q"></div><div class="mx-q"></div><div class="mx-q"></div><div class="mx-q"></div>
-<span class="mx-ax x">Hands-on execution →</span><span class="mx-ax y">Strategy depth →</span>
-<span class="mx-dot" style="left:24%;top:24%"><i></i>Strategic consultancies</span>
-<span class="mx-dot" style="left:70%;top:76%"><i></i>Low-cost delivery vendors</span>
-<span class="mx-dot me" style="left:74%;top:24%"><i></i><b>The client: strategy and shipping, in one team</b></span></div><figcaption>Simplified from the positioning work. Competitors are shown as groups, not by name.</figcaption></figure></section>
+<section class="slide visual" aria-label="Decision 2: Positioning map"><p class="eb">Finding the open space</p><figure class="fig"><div class="pz" data-pz><div class="pz-map" role="img" aria-label="Positioning map. Strategy depth runs up, hands-on execution runs right. Strategic consultancies cluster top left: they advise but rarely ship. Low-cost delivery vendors cluster bottom right: they ship but rarely shape the problem. The top-right corner, strategy and shipping together, is open, and that is where the client is placed.">
+<div class="pz-grid"><div class="pz-zone"></div>
+<div class="pz-c" style="left:25%;top:27%"><i style="left:-22px;top:-10px"></i><i style="left:0px;top:-20px"></i><i style="left:18px;top:-4px"></i><i style="left:-8px;top:10px"></i><i style="left:10px;top:16px"></i><i style="left:-28px;top:14px"></i><i style="left:26px;top:-22px"></i><b>Strategic consultancies</b></div>
+<div class="pz-c" style="left:74%;top:74%"><i style="left:-20px;top:-14px"></i><i style="left:4px;top:-22px"></i><i style="left:22px;top:-6px"></i><i style="left:-6px;top:6px"></i><i style="left:14px;top:18px"></i><i style="left:-24px;top:16px"></i><i style="left:30px;top:10px"></i><i style="left:0px;top:26px"></i><b>Low-cost delivery vendors</b></div>
+<div class="pz-me"><i></i><b>The client</b></div>
+<span class="pz-q tl">Advise, rarely ship</span><span class="pz-q br">Ship, rarely shape</span><span class="pz-q bl">Neither</span><span class="pz-q tr">The open space</span></div>
+<div class="pz-ax x"><span>Hands-on execution</span><span>→</span></div><div class="pz-ax y"><span>Strategy depth</span><span>→</span></div></div>
+<div class="pz-side"><div class="pz-line"><span>Positioning line</span><strong>Turn complex AI ideas into production-ready products.</strong></div>
+<ol class="pz-pil" aria-label="Brand pillars"><li><em>01</em>Deep AI expertise</li><li><em>02</em>End-to-end ownership</li><li><em>03</em>Delivery excellence</li><li><em>04</em>Strong engineering talent</li></ol></div></div>
+<script>(function(){var el=document.querySelector('[data-pz]');if(!el)return;if(!('IntersectionObserver' in window)||matchMedia('(prefers-reduced-motion: reduce)').matches){el.classList.add('in');return}var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){el.classList.add('in');io.disconnect()}})},{threshold:.35});io.observe(el)})();</script><figcaption>Simplified from the positioning work. Competitors are shown as groups, not by name.</figcaption></figure></section>
 <section class="slide" aria-labelledby="s-d3"><div class="split"><div><p class="eb">Decision 3</p><h2 id="s-d3">The company carries the trust, not one person.</h2></div><div class="split-r"><p>Every message follows the same order: the outcome first, then the approach, then the proof. Pages now lead with what the client delivers and how, with case studies, process and the wider team in view. The founder still appears, but as part of the company, not as the whole of it.</p></div></div></section>
 <section class="slide visual" aria-label="Decision 3: Case studies on the homepage"><p class="eb">Proof, right on the homepage</p><figure class="fig"><button class="zoom" type="button" aria-label="Enlarge figure: Case studies on the homepage"><div class="fig-media shot rv"><div class="pan"><img class="shot-img" src="../img/case-studies/ai-proof.webp" srcset="../img/case-studies/ai-proof-960.webp 960w, ../img/case-studies/ai-proof.webp 1440w" sizes="(max-width:899px) 100vw, 900px" width="1440" height="826" loading="lazy" decoding="async" alt="Homepage case studies section: four project cards, each with an industry tag, a one-line result and two headline figures"></div></div><span class="zoom-hint" aria-hidden="true">Tap to enlarge</span></button><figcaption>Case studies and figures are the client’s content.</figcaption></figure></section>
 <section class="slide" aria-labelledby="s-d4"><div class="split"><div><p class="eb">Decision 4</p><h2 id="s-d4">Refine the logo, don’t replace it.</h2></div><div class="split-r"><p>The existing mark already had recognition, so I refined it rather than starting over, and built the system around it: a navy and energetic blue palette with orange as a warm accent, Epilogue for headings and Manrope for body copy. The moodboard direction I recommended was strategic, energetic and precise. The guidelines cover how all of it is used.</p></div></div></section>
