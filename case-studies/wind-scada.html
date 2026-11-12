@@ -225,8 +225,7 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 .nx-h{margin:14px 0 0;font:500 clamp(30px,4vw,43px)/1.05 var(--f-display);letter-spacing:-.02em}
 .nx-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:28px 0 0;padding:0;list-style:none}
 .nx-list li{display:flex}
-.nx-card{position:relative;display:flex;flex-direction:column;width:100%;padding:10px;border-radius:16px;color:var(--white);background:linear-gradient(180deg,#0E1F22,#387C88);overflow:hidden;text-decoration:none}
-.nx-card.g2{background:linear-gradient(180deg,#007862,#00250A)}
+.nx-card{position:relative;display:flex;flex-direction:column;width:100%;padding:10px;border-radius:16px;color:var(--white);background:linear-gradient(180deg,#007862,#00250A);overflow:hidden;text-decoration:none}
 .nx-panel{position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;background:#0E1F22}
 .nx-panel img{position:absolute;left:0;top:-6%;width:100%;height:112%;object-fit:cover;display:block;transition:transform .9s var(--ease)}
 .nx-txt{display:flex;flex-direction:column;gap:10px;padding:20px 8px 8px;flex:1}
@@ -241,7 +240,6 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 .nx-btn .arw{position:relative;width:16px;height:16px}
 .nx-btn .arw svg{position:absolute;inset:0;transition:transform .45s var(--ease)}
 .nx-btn .arw svg:last-child{transform:translate(-170%,0)}
-.nx-card:hover h3,.nx-card:focus-visible h3{color:var(--neon)}
 .nx-card:hover .nx-panel img{transform:scale(1.04)}
 .nx-card:hover .nx-btn{transform:translateY(-2px);box-shadow:0 6px 0 var(--edge),0 18px 30px -12px rgba(42,155,92,.8),inset 0 1px 0 rgba(255,255,255,.55)}
 .nx-card:hover .nx-btn .lbl{transform:translateY(-100%)}
@@ -515,6 +513,20 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 .pt.pt-go{transition:clip-path .55s cubic-bezier(.76,0,.24,1);clip-path:inset(0 0 100% 0)}
 .pt{clip-path:inset(0 0 0 0)}
 .pt.pt-go .pt-txt{transition:transform .55s cubic-bezier(.76,0,.24,1),opacity .3s;transform:translateY(-40px);opacity:0}
+
+/* More work: one green card style; desktop cursor becomes the View work button */
+.vw-cur{position:fixed;left:0;top:0;z-index:90;pointer-events:none;opacity:0;transform:translate3d(var(--cx,-200px),var(--cy,-200px),0) translate(-50%,-50%) scale(.4);transition:opacity .2s var(--ease),transform .25s var(--ease)}
+.vw-cur.on{opacity:1;transform:translate3d(var(--cx),var(--cy),0) translate(-50%,-50%) scale(1)}
+.vw-cur .btn{box-shadow:0 6px 0 var(--edge),0 18px 30px -12px rgba(42,155,92,.8),inset 0 1px 0 rgba(255,255,255,.55)}
+.vw-cur .pill{display:block;height:1.2em;line-height:1.2;overflow:hidden}
+.vw-cur .arw{position:relative;display:block;width:16px;height:16px}
+.vw-cur .arw svg{position:absolute;inset:0}
+@media (hover:hover) and (pointer:fine){
+  .nx-card{cursor:none}
+  .nx-card .nx-btn{display:none}
+  .nx-card:focus-visible .nx-btn{display:inline-flex}
+}
+@media (prefers-reduced-motion:reduce){.vw-cur{transition:opacity .15s}}
 </style>
 </head>
 <body>
@@ -602,7 +614,7 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 <section class="slide visual" aria-label="The solution: error dashboard"><p class="eb">Error dashboard</p><figure class="fig"><button class="zoom" type="button" aria-label="Enlarge figure: The solution: error dashboard"><div class="fig-media shot rv"><div class="pan"><img class="shot-img" src="../img/case-studies/sc-errors.webp" srcset="../img/case-studies/sc-errors-960.webp 960w, ../img/case-studies/sc-errors.webp 1280w" sizes="(max-width:899px) 100vw, 900px" width="1280" height="971" loading="lazy" decoding="async" alt="Error dashboard: errors over time, counts per error code and per turbine, component-wise errors and equipment-source breakdown"></div></div><span class="zoom-hint" aria-hidden="true">Tap to enlarge</span></button><figcaption>Values are sample data.</figcaption></figure></section><section class="slide" aria-labelledby="s-read"><p class="eb">What I designed</p><h2 id="s-read" class="sr">What I designed</h2><ol class="callouts"><li><span class="pin" aria-hidden="true">1</span><span>Farm overview with live turbine status and errors.</span></li><li><span class="pin" aria-hidden="true">2</span><span>Individual turbine view, with switch and compare built in.</span></li><li><span class="pin" aria-hidden="true">3</span><span>Feeder control: group commands and turbine status.</span></li><li><span class="pin" aria-hidden="true">4</span><span>Park control: farm-wide commands and their progress.</span></li><li><span class="pin" aria-hidden="true">5</span><span>Administration: users, roles, enable and disable.</span></li><li><span class="pin" aria-hidden="true">6</span><span>A reports home built to grow past ten report types.</span></li><li><span class="pin" aria-hidden="true">7</span><span>Daily Generation Report workflow, from Not Created to Approved.</span></li><li><span class="pin" aria-hidden="true">8</span><span>Power curve analytics and the engineering report.</span></li></ol></section>
 <section class="slide statement" aria-labelledby="s-end"><p class="eb">Takeaway</p><h2 id="s-end" class="h-xl">We didn’t add more controls. We put each one where it belongs.</h2></section>
   </div>
-  <section class="col next" aria-labelledby="nx-h"><p class="eb">Next project</p><h2 id="nx-h" class="nx-h">More work</h2><ul class="nx-list"><li><a class="nx-card" href="visual-intelligence.html"><div class="nx-panel"><img src="../img/works/brelyon.jpg" alt="Audit dashboard on a desktop monitor, showing the User Action Genome chart" loading="lazy" decoding="async"></div><div class="nx-txt"><span class="nx-no">01</span><h3>Spatial Design for Enterprise AI Intelligence</h3><p>Enterprise AI, spatial UI · Interface system designer</p></div><span class="btn nx-btn"><span class="pill"><span class="lbl" data-t="View work">View work</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg></span></span></span></a></li><li><a class="nx-card " href="ai-consultancy.html"><div class="nx-panel"><img src="../img/works/ai-consultancy.jpg" alt="Enterprise AI consultancy website homepage on a laptop" loading="lazy" decoding="async"></div><div class="nx-txt"><span class="nx-no">03</span><h3>Making an enterprise AI consultancy easy to verify</h3><p>Brand and website · Lead designer, workshops to handoff</p></div><span class="btn nx-btn"><span class="pill"><span class="lbl" data-t="View work">View work</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg></span></span></span></a></li><li><a class="nx-card g2" href="blii.html"><div class="nx-panel"><img src="../img/works/blii.jpg" alt="Blii mobile screens: AI chat summary, home with smart prompts, and all saves by topic" loading="lazy" decoding="async"></div><div class="nx-txt"><span class="nx-no">04</span><h3>A chat that remembers everything you save</h3><p>AI knowledge app, iOS · Solo designer, end to end</p></div><span class="btn nx-btn"><span class="pill"><span class="lbl" data-t="View work">View work</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg></span></span></span></a></li></ul></section>
+  <section class="col next" aria-labelledby="nx-h"><p class="eb">Next project</p><h2 id="nx-h" class="nx-h">More work</h2><ul class="nx-list"><li><a class="nx-card" href="visual-intelligence.html"><div class="nx-panel"><img src="../img/works/brelyon.jpg" alt="Audit dashboard on a desktop monitor, showing the User Action Genome chart" loading="lazy" decoding="async"></div><div class="nx-txt"><span class="nx-no">01</span><h3>Spatial Design for Enterprise AI Intelligence</h3><p>Enterprise AI, spatial UI · Interface system designer</p></div><span class="btn nx-btn"><span class="pill"><span class="lbl" data-t="View work">View work</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg></span></span></span></a></li><li><a class="nx-card" href="ai-consultancy.html"><div class="nx-panel"><img src="../img/works/ai-consultancy.jpg" alt="Enterprise AI consultancy website homepage on a laptop" loading="lazy" decoding="async"></div><div class="nx-txt"><span class="nx-no">03</span><h3>Brand and website for an enterprise AI consultancy</h3><p>Enterprise AI, brand and web · Lead designer</p></div><span class="btn nx-btn"><span class="pill"><span class="lbl" data-t="View work">View work</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg></span></span></span></a></li><li><a class="nx-card" href="blii.html"><div class="nx-panel"><img src="../img/works/blii.jpg" alt="Blii mobile screens: AI chat summary, home with smart prompts, and all saves by topic" loading="lazy" decoding="async"></div><div class="nx-txt"><span class="nx-no">04</span><h3>A chat that remembers everything you save</h3><p>AI knowledge app, iOS · Solo designer, end to end</p></div><span class="btn nx-btn"><span class="pill"><span class="lbl" data-t="View work">View work</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg></span></span></span></a></li></ul></section>
 </main>
 <section class="contact" id="contact" data-tone="dark">
   <div class="contact-bgwrap" aria-hidden="true"><canvas class="contact-bg" data-viz="contact"></canvas></div>
@@ -810,6 +822,26 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
     const f = top && top.querySelector('a, button');
     if (f) setTimeout(() => f.focus({ preventScroll: true }), smooth ? 700 : 0);
   }));
+})();
+</script>
+<div class="vw-cur" aria-hidden="true"><span class="btn"><span class="pill"><span class="lbl">View work</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg></span></span></span></div>
+<script>
+(() => {
+  const mq = matchMedia('(hover: hover) and (pointer: fine)'), cur = document.querySelector('.vw-cur');
+  if (!cur) return;
+  let x = -200, y = -200, raf = 0;
+  const check = () => {
+    raf = 0;
+    if (!mq.matches) { cur.classList.remove('on'); return; }
+    const el = document.elementFromPoint(x, y);
+    cur.style.setProperty('--cx', x + 'px'); cur.style.setProperty('--cy', y + 'px');
+    cur.classList.toggle('on', !!(el && el.closest('.nx-card')));
+  };
+  const queue = () => { if (!raf) raf = requestAnimationFrame(check); };
+  addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; x = e.clientX; y = e.clientY; queue(); }, { passive: true });
+  addEventListener('scroll', queue, { passive: true });
+  document.documentElement.addEventListener('pointerleave', () => cur.classList.remove('on'));
+  addEventListener('pageshow', () => cur.classList.remove('on'));
 })();
 </script>
 </body>
