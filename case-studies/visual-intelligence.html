@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<script>document.documentElement.classList.add('js')</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Making machine-scale behaviour readable · Akash S Kumar</title>
 <meta name="description" content="Case study: an analysis workspace that turns thousands of machine-read actions into a timeline an analyst can scan.">
@@ -67,7 +68,7 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 
 /* slides: white cards with a faint dot grid, one idea each */
 .slides{display:grid;gap:16px}
-.slide{position:relative;display:flex;flex-direction:column;justify-content:center;gap:24px;min-height:min(560px,calc(100svh - 120px));padding:clamp(28px,7vw,72px);
+.slide{position:relative;display:flex;flex-direction:column;justify-content:center;gap:24px;min-height:min(680px,calc(100svh - 120px));padding:clamp(28px,7vw,72px);
   background-color:var(--white);background-image:radial-gradient(rgba(17,37,41,.13) 1px,transparent 1.3px);background-size:20px 20px;background-position:10px 10px;
   border:1px solid var(--line);border-radius:var(--r-card)}
 .slide.visual{padding-inline:clamp(16px,4vw,48px);gap:28px}
@@ -128,6 +129,44 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 .lb-x{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:2;padding:10px 14px;border-radius:12px;background:var(--deep-500);color:var(--white);font:500 12px/1 var(--f-mono)}
 .lb-tip{position:fixed;top:calc(24px + env(safe-area-inset-top,0px));left:16px;font:500 11px/1 var(--f-mono);color:var(--grey-800)}
 
+
+/* scroll-stepped levels (Decision 1) */
+.rm-slide{justify-content:flex-start;gap:0}
+.rm-head{position:relative;display:grid;margin:22px 0 0;font:500 clamp(20px,3vw,30px)/1.2 var(--f-mono);color:var(--neon-900);letter-spacing:0}
+.rm-h{grid-area:1/1;transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.rm-h:not(.on){opacity:0;transform:translateY(10px);pointer-events:none}
+.rm-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0 0;padding:0;list-style:none}
+.rm-bar{display:block;height:3px;border-radius:2px;background:rgba(21,77,50,.15);overflow:hidden}
+.rm-bar i{display:block;height:100%;width:var(--f,0%);background:var(--neon-900);border-radius:inherit}
+.rm-step:first-child .rm-bar i{width:var(--f,100%)}
+.rm-l{display:block;margin-top:10px;padding-left:16px;font:500 12px/1.3 var(--f-mono);color:var(--neon-900);opacity:.48;transition:opacity .4s var(--ease)}
+.rm-step.on .rm-l{opacity:1}
+.rm-stage{display:grid;margin:clamp(24px,3.5vw,36px) clamp(0px,2.5vw,24px) 0}
+.rm-shot{grid-area:1/1;opacity:0;transform:translateY(18px) scale(.985);transition:opacity .6s var(--ease),transform .7s var(--ease);will-change:opacity,transform}
+.rm-shot.on{opacity:1;transform:none}
+.rm-foot{display:flex;justify-content:space-between;gap:16px;margin-top:20px;font-size:13px;color:var(--grey-800)}
+.rm-count{font:500 12px/1.4 var(--f-mono);color:var(--neon-900)}
+.rm-count b{font-weight:500}
+.js .rm{height:calc(100svh + 150svh)}
+.js .rm-slide{position:sticky;top:84px}
+@media (max-width:899px){
+  .rm-steps{gap:8px}
+  .rm-l{padding-left:0;font-size:10px}
+  .rm-foot span:first-child{font-size:12px}
+  .js .rm-slide{top:76px}
+}
+/* screens animate in as they appear */
+.js .shot.rv{opacity:0;transform:translateY(32px) scale(.97);clip-path:inset(8% 6% 8% 6% round 14px);transition:opacity .7s var(--ease),transform 1s var(--ease),clip-path 1s var(--ease)}
+.js .shot.rv .shot-img{transform:scale(1.06);transition:transform 1.4s var(--ease)}
+.js .shot.rv.in{opacity:1;transform:none;clip-path:inset(0 0 0 0 round 14px)}
+.js .shot.rv.in .shot-img{transform:none}
+.js .pinned.rv .fpin{opacity:0;transform:translate(-50%,-50%) scale(.3);transition:opacity .35s var(--ease),transform .5s cubic-bezier(.34,1.56,.64,1);transition-delay:calc(.7s + var(--n,0) * 90ms)}
+.js .pinned.rv.in .fpin{opacity:1;transform:translate(-50%,-50%)}
+@media (prefers-reduced-motion:reduce){
+  .js .shot.rv,.js .shot.rv .shot-img,.js .pinned.rv .fpin,.rm-shot,.rm-h,.rm-l{transition:none!important}
+  .js .shot.rv{opacity:1;transform:none;clip-path:none}.js .shot.rv .shot-img{transform:none}
+  .js .pinned.rv .fpin{opacity:1;transform:translate(-50%,-50%)}
+}
 /* next + footer */
 .next{padding:clamp(56px,8vw,96px) 0 clamp(64px,10vw,120px)}
 .next .eb{color:var(--grey-800)}
@@ -173,8 +212,8 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 <section class="slide statement" aria-labelledby="s-open"><p class="eb">Case study</p>
 <h2 id="s-open" class="h-xl">Designing a visual language for machine-understood behaviour</h2>
 <p class="sub">Enterprise visual intelligence · Data visualisation</p>
-<p class="nda"><span class="tag-o">NDA</span><span>This project was completed under NDA. The client, product names, datasets and interface details have been abstracted or modified for confidentiality.</span></p></section>
-<section class="slide visual" aria-label="The analysis workspace"><p class="eb">The workspace</p><figure class="fig"><button class="zoom" type="button" aria-label="Enlarge figure: The analysis workspace"><div class="fig-media shot"><img class="shot-img" src="../img/case-studies/vi-task-genome.webp" srcset="../img/case-studies/vi-task-genome-960.webp 960w, ../img/case-studies/vi-task-genome.webp 1920w" sizes="(max-width:899px) 100vw, 900px" width="1920" height="1080" loading="lazy" decoding="async" alt="The analysis workspace: a sub-task genome chart with colour-coded action categories over time, a range selector and summary cards"></div><span class="zoom-hint" aria-hidden="true">Tap to enlarge</span></button></figure></section>
+<p class="nda"><span class="tag-o">NDA</span><span>Completed under NDA. The client, product names, datasets and interface details have been abstracted or modified for confidentiality.</span></p></section>
+<section class="slide visual" aria-label="The analysis workspace"><p class="eb">The workspace</p><figure class="fig"><button class="zoom" type="button" aria-label="Enlarge figure: The analysis workspace"><div class="fig-media shot rv"><img class="shot-img" src="../img/case-studies/vi-task-genome.webp" srcset="../img/case-studies/vi-task-genome-960.webp 960w, ../img/case-studies/vi-task-genome.webp 1920w" sizes="(max-width:899px) 100vw, 900px" width="1920" height="1080" loading="lazy" decoding="async" alt="The analysis workspace: a sub-task genome chart with colour-coded action categories over time, a range selector and summary cards"></div><span class="zoom-hint" aria-hidden="true">Tap to enlarge</span></button></figure></section>
 <section class="slide" aria-labelledby="s-short"><p class="eb">In short</p><h2 id="s-short" class="sr">In short</h2>
 <p class="lead">A visual intelligence company had interaction data that machines could read and people couldn't. I led the design end to end and built a colour-coded Behaviour Timeline, so analysts can scan behaviour over time, pick any window and see every view update.</p>
 <dl class="facts"><div><dt>Role</dt><dd>Sole product designer, end to end</dd></div><div><dt>Team</dt><dd>Me (design) and one developer</dd></div><div><dt>Tools</dt><dd>Figma, [others]</dd></div><div><dt>Platform</dt><dd>Analytical web workspace</dd></div></dl></section>
@@ -186,22 +225,22 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 <section class="slide" aria-labelledby="s-role"><p class="eb">My role</p>
 <h2 id="s-role">The only designer, end to end</h2>
 <p>I gathered the client’s needs, handled client communication and designed the product, the visual language and the interaction model. One developer built the platform, and we worked closely on what could ship.</p>
-<div class="cons"><span class="cons-l">Constraints</span><ul><li>Very dense data</li><li>A technical audience</li><li>NDA limits on what I can show</li></ul></div></section>
+<div class="cons"><span class="cons-l">Constraints</span><ul><li>Very dense data</li><li>A technical audience</li></ul></div></section>
 <section class="slide" aria-labelledby="s-d1"><div class="split"><div><p class="eb">Decision 1</p><h2 id="s-d1">Give the complexity structure, don’t remove it.</h2></div>
-<div class="split-r"><p>I kept the data dense and organised it in three levels: an overview of the whole picture, a view of individual actions over time, and a view of grouped sequences. Stripping detail would have stripped the patterns analysts came for.</p><div class="trade"><span>Trade-off</span><p>[e.g. more views to learn, offset by shared controls]</p></div></div></div></section>
-<section class="slide visual" aria-label="Decision 1: Three levels, one set of controls"><p class="eb">Three levels, one set of controls</p><figure class="fig"><button class="zoom" type="button" aria-label="Enlarge figure: Decision 1: Three levels, one set of controls"><div class="fig-media tri"><div class="tri-i"><span class="tri-l">01 Overview</span><img class="shot-img" src="../img/case-studies/vi-report.webp" srcset="../img/case-studies/vi-report-960.webp 960w, ../img/case-studies/vi-report.webp 1920w" sizes="(max-width:899px) 100vw, 900px" width="1920" height="1080" loading="lazy" decoding="async" alt="Overview level: KPI cards, an action distribution ring and a sub-task rank chart"></div><div class="tri-i"><span class="tri-l">02 Actions over time</span><img class="shot-img" src="../img/case-studies/vi-timeline.webp" srcset="../img/case-studies/vi-timeline-960.webp 960w, ../img/case-studies/vi-timeline.webp 1920w" sizes="(max-width:899px) 100vw, 900px" width="1920" height="1080" loading="lazy" decoding="async" alt="Actions level: every action plotted as a coloured mark along a time axis"></div><div class="tri-i"><span class="tri-l">03 Grouped sequences</span><img class="shot-img" src="../img/case-studies/vi-grouped.webp" srcset="../img/case-studies/vi-grouped-960.webp 960w, ../img/case-studies/vi-grouped.webp 1920w" sizes="(max-width:899px) 100vw, 900px" width="1920" height="1080" loading="lazy" decoding="async" alt="Sequences level: repeated action sequences shown as small multiples"></div></div><span class="zoom-hint" aria-hidden="true">Tap to enlarge</span></button><figcaption>Product UI. Client branding removed.</figcaption></figure></section>
+<div class="split-r"><p>I kept the data dense and organised it in three levels: an overview of the whole picture, a view of individual actions over time, and a view of grouped sequences. Stripping detail would have stripped the patterns analysts came for.</p></div></div></section>
+<div class="rm" id="levels"><section class="slide rm-slide" aria-label="Decision 1: Three levels, one set of controls"><p class="eb">Three levels, one set of controls</p><h3 class="rm-head"><span class="rm-h on" data-i="0">01&nbsp;&nbsp;Overview</span><span class="rm-h" data-i="1">02&nbsp;&nbsp;Actions over time</span><span class="rm-h" data-i="2">03&nbsp;&nbsp;Grouped sequences</span></h3><ol class="rm-steps"><li class="rm-step on" data-i="0"><span class="rm-bar"><i></i></span><span class="rm-l">01 Overview</span></li><li class="rm-step" data-i="1"><span class="rm-bar"><i></i></span><span class="rm-l">02 Actions over time</span></li><li class="rm-step" data-i="2"><span class="rm-bar"><i></i></span><span class="rm-l">03 Grouped sequences</span></li></ol><div class="rm-stage"><div class="rm-shot shot on" data-i="0"><img class="shot-img" src="../img/case-studies/vi-report.webp" srcset="../img/case-studies/vi-report-960.webp 960w, ../img/case-studies/vi-report.webp 1920w" sizes="(max-width:899px) 100vw, 800px" width="1920" height="1080" loading="lazy" decoding="async" alt="Overview level: KPI cards, an action distribution ring and a sub-task rank chart"></div><div class="rm-shot shot" data-i="1"><img class="shot-img" src="../img/case-studies/vi-timeline.webp" srcset="../img/case-studies/vi-timeline-960.webp 960w, ../img/case-studies/vi-timeline.webp 1920w" sizes="(max-width:899px) 100vw, 800px" width="1920" height="1080" loading="lazy" decoding="async" alt="Actions level: every action plotted as a coloured mark along a time axis"></div><div class="rm-shot shot" data-i="2"><img class="shot-img" src="../img/case-studies/vi-grouped.webp" srcset="../img/case-studies/vi-grouped-960.webp 960w, ../img/case-studies/vi-grouped.webp 1920w" sizes="(max-width:899px) 100vw, 800px" width="1920" height="1080" loading="lazy" decoding="async" alt="Sequences level: repeated action sequences shown as small multiples"></div></div><div class="rm-foot"><span>Product UI. Client branding removed.</span><span class="rm-count"><b>01</b> / 03</span></div></section></div>
 <section class="slide" aria-labelledby="s-d2"><div class="split"><div><p class="eb">Decision 2</p><h2 id="s-d2">A timeline you can scan.</h2></div>
-<div class="split-r"><p>Events sit along a time axis with a selector underneath for choosing a window. Analysts see the whole session, pick a slice and inspect it without losing their place, the way editors work in a video timeline such as Adobe Premiere Pro. One selection filters every view in the workspace.</p><div class="trade"><span>Trade-off</span><p>[what it costs]</p></div></div></div></section>
+<div class="split-r"><p>Events sit along a time axis with a selector underneath for choosing a window. Analysts see the whole session, pick a slice and inspect it without losing their place, the way editors work in a video timeline such as Adobe Premiere Pro. One selection filters every view in the workspace.</p></div></div></section>
 <section class="slide" aria-labelledby="s-d3"><div class="split"><div><p class="eb">Decision 3</p><h2 id="s-d3">Colour carries the data, and only the data.</h2></div>
 <div class="split-r"><p>Each kind of action gets its own colour, while purple is reserved for interface states like active tabs and selections. Users can tell what is data and what is interface.</p><div class="trade"><span>Trade-off</span><p>[e.g. a limited number of distinguishable colours, and colour alone isn’t enough, so I added [labels/shapes], if true]</p></div></div></div></section>
-<section class="slide visual" aria-label="Decision 3: Data colours vs. interface colour"><p class="eb">Data colours vs. interface colour</p><figure class="fig"><button class="zoom" type="button" aria-label="Enlarge figure: Decision 3: Data colours vs. interface colour"><div class="fig-media shot"><img class="shot-img" src="../img/case-studies/vi-task-genome-detail.webp" srcset="../img/case-studies/vi-task-genome-detail-960.webp 960w, ../img/case-studies/vi-task-genome-detail.webp 1920w" sizes="(max-width:899px) 100vw, 900px" width="1920" height="1080" loading="lazy" decoding="async" alt="Sequence cards where block colours mark action categories, while purple marks the selected card and the controls"></div><span class="zoom-hint" aria-hidden="true">Tap to enlarge</span></button><figcaption>Block colours are data. Purple is the interface: the selected card and the controls.</figcaption></figure></section>
+<section class="slide visual" aria-label="Decision 3: Data colours vs. interface colour"><p class="eb">Data colours vs. interface colour</p><figure class="fig"><button class="zoom" type="button" aria-label="Enlarge figure: Decision 3: Data colours vs. interface colour"><div class="fig-media shot rv"><img class="shot-img" src="../img/case-studies/vi-task-genome-detail.webp" srcset="../img/case-studies/vi-task-genome-detail-960.webp 960w, ../img/case-studies/vi-task-genome-detail.webp 1920w" sizes="(max-width:899px) 100vw, 900px" width="1920" height="1080" loading="lazy" decoding="async" alt="Sequence cards where block colours mark action categories, while purple marks the selected card and the controls"></div><span class="zoom-hint" aria-hidden="true">Tap to enlarge</span></button></figure></section>
 <section class="slide" aria-labelledby="s-d4"><div class="split"><div><p class="eb">Decision 4</p><h2 id="s-d4">From schematic to parametric.</h2></div>
-<div class="split-r"><p>My first relationship visualisation showed that connections existed but not how they differed. The client asked for a parametric approach, so I made connection thickness follow the strength of the relationship.</p><div class="trade"><span>Trade-off</span><p>[e.g. more complex to build]</p></div></div></div></section>
-<section class="slide visual" aria-label="Decision 4: The parametric relationship view"><p class="eb">The parametric version</p><figure class="fig"><button class="zoom" type="button" aria-label="Enlarge figure: Decision 4: The parametric relationship view"><div class="fig-media shot"><img class="shot-img" src="../img/case-studies/vi-relationships.webp" srcset="../img/case-studies/vi-relationships-960.webp 960w, ../img/case-studies/vi-relationships.webp 1920w" sizes="(max-width:899px) 100vw, 900px" width="1920" height="1080" loading="lazy" decoding="async" alt="Cluster structure flow chart where each connection is as thick as the relationship is strong"></div><span class="zoom-hint" aria-hidden="true">Tap to enlarge</span></button><figcaption>Connection thickness follows the strength of each relationship.</figcaption></figure></section>
+<div class="split-r"><p>My first relationship visualisation showed that connections existed but not how they differed. The client asked for a parametric approach, so I made connection thickness follow the strength of the relationship.</p></div></div></section>
+<section class="slide visual" aria-label="Decision 4: The parametric relationship view"><p class="eb">The parametric version</p><figure class="fig"><button class="zoom" type="button" aria-label="Enlarge figure: Decision 4: The parametric relationship view"><div class="fig-media shot rv"><img class="shot-img" src="../img/case-studies/vi-relationships.webp" srcset="../img/case-studies/vi-relationships-960.webp 960w, ../img/case-studies/vi-relationships.webp 1920w" sizes="(max-width:899px) 100vw, 900px" width="1920" height="1080" loading="lazy" decoding="async" alt="Cluster structure flow chart where each connection is as thick as the relationship is strong"></div><span class="zoom-hint" aria-hidden="true">Tap to enlarge</span></button><figcaption>Connection thickness follows the strength of each relationship.</figcaption></figure></section>
 <section class="slide statement" aria-labelledby="s-sol"><p class="eb">The solution</p>
 <h2 id="s-sol" class="h-xl">The Behaviour Timeline</h2>
 <p>Every action is a coloured mark placed by when it happened. You can read bursts of activity, gaps and repeating patterns at a glance, then drill into a window.</p></section>
-<section class="slide visual" aria-label="The Behaviour Timeline with numbered callouts"><p class="eb">Seven parts of one screen</p><figure class="fig"><button class="zoom" type="button" aria-label="Enlarge figure: The Behaviour Timeline with numbered callouts"><div class="fig-media shot pinned"><img class="shot-img" src="../img/case-studies/vi-timeline.webp" srcset="../img/case-studies/vi-timeline-960.webp 960w, ../img/case-studies/vi-timeline.webp 1920w" sizes="(max-width:899px) 100vw, 900px" width="1920" height="1080" loading="lazy" decoding="async" alt="The Behaviour Timeline screen with seven numbered callouts"><div aria-hidden="true"><span class="fpin" style="left:29.17%;top:27.78%">1</span><span class="fpin" style="left:67.71%;top:68.70%">2</span><span class="fpin" style="left:18.33%;top:61.11%">3</span><span class="fpin" style="left:56.09%;top:63.89%">4</span><span class="fpin" style="left:62.50%;top:66.48%">5</span><span class="fpin" style="left:54.48%;top:80.37%">6</span><span class="fpin" style="left:80.47%;top:78.70%">7</span></div></div><span class="zoom-hint" aria-hidden="true">Tap to enlarge</span></button><figcaption>Product UI. Client branding removed.</figcaption></figure></section>
+<section class="slide visual" aria-label="The Behaviour Timeline with numbered callouts"><p class="eb">Seven parts of one screen</p><figure class="fig"><button class="zoom" type="button" aria-label="Enlarge figure: The Behaviour Timeline with numbered callouts"><div class="fig-media shot pinned rv"><img class="shot-img" src="../img/case-studies/vi-timeline.webp" srcset="../img/case-studies/vi-timeline-960.webp 960w, ../img/case-studies/vi-timeline.webp 1920w" sizes="(max-width:899px) 100vw, 900px" width="1920" height="1080" loading="lazy" decoding="async" alt="The Behaviour Timeline screen with seven numbered callouts"><div aria-hidden="true"><span class="fpin" style="left:29.17%;top:27.78%;--n:0">1</span><span class="fpin" style="left:67.71%;top:68.70%;--n:1">2</span><span class="fpin" style="left:18.33%;top:61.11%;--n:2">3</span><span class="fpin" style="left:56.09%;top:63.89%;--n:3">4</span><span class="fpin" style="left:62.50%;top:66.48%;--n:4">5</span><span class="fpin" style="left:54.48%;top:80.37%;--n:5">6</span><span class="fpin" style="left:80.47%;top:78.70%;--n:6">7</span></div></div><span class="zoom-hint" aria-hidden="true">Tap to enlarge</span></button></figure></section>
 <section class="slide" aria-labelledby="s-read"><p class="eb">How it reads</p><h2 id="s-read" class="sr">How it reads</h2><ol class="callouts"><li><span class="pin" aria-hidden="true">1</span><span>Time runs across, and each action is a mark placed by when it happened.</span></li><li><span class="pin" aria-hidden="true">2</span><span>Colour = category of action, with a legend.</span></li><li><span class="pin" aria-hidden="true">3</span><span>A range selector underneath chooses the window to inspect.</span></li><li><span class="pin" aria-hidden="true">4</span><span>The selection filters every view at once, so the whole analysis follows the time window.</span></li><li><span class="pin" aria-hidden="true">5</span><span>Selected date and time stay visible, so the analyst never loses their place.</span></li><li><span class="pin" aria-hidden="true">6</span><span>Time controls (start, end, Apply, Reset) work the same everywhere.</span></li><li><span class="pin" aria-hidden="true">7</span><span>A distribution ring and a KPI card sit beside the plot, so one screen gives both the pattern and the summary.</span></li></ol></section>
 <section class="slide statement" aria-labelledby="s-end"><p class="eb">Takeaway</p><h2 id="s-end" class="h-xl">We didn’t remove complexity. We gave it structure.</h2></section>
   </div>
@@ -223,6 +262,37 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
   }));
   document.getElementById('lbx').addEventListener('click', () => lb.close());
   lb.addEventListener('click', e => { if (e.target === lb) lb.close(); });
+})();
+</script>
+<script>
+(() => {
+  // reveal screens once, as they scroll into view
+  const rv = document.querySelectorAll('.shot.rv');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {rootMargin: '0px 0px -12% 0px', threshold: 0.15});
+    rv.forEach(el => io.observe(el));
+  } else rv.forEach(el => el.classList.add('in'));
+
+  // Decision 1: three levels stepped by scroll
+  const rm = document.getElementById('levels'); if (!rm) return;
+  const slide = rm.querySelector('.rm-slide');
+  const parts = sel => [...rm.querySelectorAll(sel)];
+  const heads = parts('.rm-h'), steps = parts('.rm-step'), shots = parts('.rm-shot'), count = rm.querySelector('.rm-count b');
+  shots.forEach(s => s.querySelector('img').loading = 'eager');
+  let cur = -1, raf = 0;
+  const render = () => {
+    raf = 0;
+    const top = parseFloat(getComputedStyle(slide).top) || 0;
+    const total = rm.offsetHeight - slide.offsetHeight;
+    const p = total > 0 ? Math.min(1, Math.max(0, (top - rm.getBoundingClientRect().top) / total)) : 0;
+    const x = p * 3, i = Math.min(2, Math.floor(x));
+    steps.forEach((s, k) => s.querySelector('i').style.setProperty('--f', (k < i ? 100 : k > i ? 0 : Math.max(8, (x - i) * 100)) + '%'));
+    if (i === cur) return; cur = i;
+    [heads, steps, shots].forEach(list => list.forEach((el, k) => el.classList.toggle('on', k === i)));
+    count.textContent = '0' + (i + 1);
+  };
+  const ask = () => { if (!raf) raf = requestAnimationFrame(render); };
+  addEventListener('scroll', ask, {passive: true}); addEventListener('resize', ask); render();
 })();
 </script>
 </body>
