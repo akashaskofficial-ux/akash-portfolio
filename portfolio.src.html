@@ -726,7 +726,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
 .pt-no{font:500 13px/1 "Geist Mono",ui-monospace,monospace;letter-spacing:.04em;color:#5EFF88;text-transform:uppercase}
 .pt-t{margin:0;max-width:16ch;font:500 clamp(34px,5.6vw,84px)/1.02 "Archivo","Helvetica Neue",Arial,sans-serif;letter-spacing:-.025em;text-transform:uppercase}
 .pt-out .pt-txt>*{opacity:0;transform:translateY(24px)}
-.pt-txt>*{transition:opacity .45s var(--ease),transform .6s var(--ease)}
+.pt-txt>*{transition:opacity .3s var(--ease),transform .4s var(--ease)}
 .pt-txt>:nth-child(2){transition-delay:.06s}
 </style>
 
@@ -1948,10 +1948,10 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
       if (img) ov.querySelector('.pt-img').style.backgroundImage = 'url("' + img + '")';
       document.body.appendChild(ov);
       const from = `inset(${r.top}px ${W - r.right}px ${H - r.bottom}px ${r.left}px round 16px)`;
-      ov.animate([{ clipPath: from, opacity: .0 }, { clipPath: from, opacity: 1, offset: .18 }, { clipPath: 'inset(0px 0px 0px 0px round 0px)', opacity: 1 }], { duration: 820, easing: ease, fill: 'forwards' });
-      ov.querySelector('.pt-img').animate([{ opacity: 0, transform: 'scale(1.25)' }, { opacity: .26, transform: 'scale(1.06)' }], { duration: 900, easing: ease, fill: 'forwards' });
-      setTimeout(() => ov.classList.remove('pt-out'), 520);
-      setTimeout(() => { location.href = href; }, 1050);
+      ov.animate([{ clipPath: from, opacity: .0 }, { clipPath: from, opacity: 1, offset: .18 }, { clipPath: 'inset(0px 0px 0px 0px round 0px)', opacity: 1 }], { duration: 520, easing: ease, fill: 'forwards' });
+      ov.querySelector('.pt-img').animate([{ opacity: 0, transform: 'scale(1.25)' }, { opacity: .26, transform: 'scale(1.06)' }], { duration: 560, easing: ease, fill: 'forwards' });
+      setTimeout(() => ov.classList.remove('pt-out'), 280);
+      setTimeout(() => { location.href = href; }, 640);
     });
   });
   addEventListener('pageshow', e => { if (e.persisted) document.querySelectorAll('.pt').forEach(n => n.remove()); });
