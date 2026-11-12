@@ -42,6 +42,59 @@ svg .m{font-family:var(--f-mono)} svg .b{font-family:var(--f-body)}
 .links a{padding:10px 14px;border-radius:10px;font:500 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted-400);white-space:nowrap;transition:color .3s var(--ease)}
 .links a:hover{color:var(--deep-500)}
 .links a.now{background:var(--neon);color:var(--deep-500)}
+/* menu key (tablet + phone): a dark cap next to the resume cap; its two bars cross into an X when open */
+.mtog{display:none;align-items:center;justify-content:center;width:42px;height:42px;padding:0;border-radius:13px;background:var(--deep-500);color:var(--neon-50);
+  font:500 11px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;box-shadow:0 4px 0 var(--deep-900),inset 0 1px 0 rgba(200,255,217,.14);
+  transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.mtog:active{transform:translateY(3px);box-shadow:0 1px 0 var(--deep-900),inset 0 1px 0 rgba(200,255,217,.14);transition-duration:.06s}
+.mt-i{position:relative;width:18px;height:10px}
+.mt-i i{position:absolute;left:0;right:0;height:1.5px;border-radius:2px;background:var(--neon);transition:transform .45s var(--ease),top .45s var(--ease)}
+.mt-i i:first-child{top:0}
+.mt-i i:last-child{top:8.5px}
+.menu-open .mt-i i{top:4.25px}
+.menu-open .mt-i i:first-child{transform:rotate(45deg)}
+.menu-open .mt-i i:last-child{transform:rotate(-45deg)}
+.mmenu{display:none}
+@media (max-width:899px){
+  .links{display:none}
+  .mtog{display:inline-flex}
+  .nav.menu-open{color:var(--white)}
+  .mmenu{display:flex;flex-direction:column;justify-content:space-between;position:fixed;inset:0;z-index:44;background:var(--deep-900);color:var(--white);
+    padding:calc(104px + env(safe-area-inset-top,0px)) max(16px, env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(16px, env(safe-area-inset-left,0px));
+    clip-path:inset(0 0 100% 0 round 0 0 28px 28px);visibility:hidden;transition:clip-path .6s var(--ease),visibility 0s linear .6s;overflow-y:auto;overscroll-behavior:contain}
+  .mmenu::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background:radial-gradient(60% 40% at 85% 0%,rgba(94,255,136,.16),transparent 70%),repeating-linear-gradient(0deg,rgba(200,255,217,.04) 0 1px,transparent 1px 56px)}
+  .menu-open + .mmenu{clip-path:inset(0 0 0 0 round 0);visibility:visible;transition:clip-path .6s var(--ease),visibility 0s}
+  .mmenu:focus{outline:none}
+  .mm-in{position:relative;display:flex;flex-direction:column}
+  .mm-in a{display:flex;align-items:baseline;gap:16px;padding:16px 0;border-bottom:1px solid rgba(200,255,217,.12);color:var(--white);
+    opacity:0;transform:translateY(24px);transition:opacity .4s var(--ease),transform .6s var(--ease),color .2s var(--ease)}
+  .mm-in a:first-child{border-top:1px solid rgba(200,255,217,.12)}
+  .menu-open + .mmenu .mm-in a{opacity:1;transform:none}
+  .menu-open + .mmenu .mm-in a:nth-child(1){transition-delay:.12s}
+  .menu-open + .mmenu .mm-in a:nth-child(2){transition-delay:.17s}
+  .menu-open + .mmenu .mm-in a:nth-child(3){transition-delay:.22s}
+  .menu-open + .mmenu .mm-in a:nth-child(4){transition-delay:.27s}
+  .menu-open + .mmenu .mm-in a:nth-child(5){transition-delay:.32s}
+  .menu-open + .mmenu .mm-in a:nth-child(6){transition-delay:.37s}
+  .mm-n{font:500 11px/1 var(--f-mono);color:var(--muted-400);letter-spacing:.06em}
+  .mm-t{font:600 clamp(34px,9vw,56px)/1 var(--f-display);text-transform:uppercase;letter-spacing:-.02em}
+  .mm-in a.now,.mm-in a:hover{color:var(--neon)}
+  .mm-in a.now .mm-n{color:var(--neon)}
+  .mm-foot{position:relative;display:flex;flex-direction:column;gap:14px;margin-top:40px;font:500 12px/1.4 var(--f-mono);color:var(--muted-200)}
+  .mm-foot > a{color:var(--white);font-size:13px}
+  .mm-soc{display:flex;gap:20px}
+  .mm-foot a:hover{color:var(--neon)}
+}
+@media (max-width:899px) and (prefers-reduced-motion:reduce){
+  .mmenu,.mm-in a{transition:none!important}
+}
+.nav-actions{display:flex;align-items:center;gap:8px}
+@media (max-width:899px){
+  .nav{z-index:50;transition:background .3s var(--ease)}
+  .nav.menu-open{background:transparent}
+  .nav.menu-open .brand{color:var(--white)}
+}
 /* keycap CTA from the design system */
 .btn{--ax:1;--ay:0;--edge:var(--neon-700);position:relative;display:inline-flex;align-items:center;gap:12px;height:42px;padding:0 4px 0 16px;border-radius:13px;
   background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 55%),var(--neon);color:var(--deep-500);font:500 13px/1 var(--f-mono);white-space:nowrap;
@@ -132,7 +185,7 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 
 /* scroll-stepped levels (Decision 1) */
 .rm-slide{justify-content:flex-start;gap:0}
-.rm-head{position:relative;display:grid;margin:22px 0 0;font:500 clamp(20px,3vw,30px)/1.2 var(--f-mono);color:var(--neon-900);letter-spacing:0}
+.rm-head{position:relative;display:grid;margin:22px 0 0;font:500 clamp(28px,3.4vw,43px)/1.04 var(--f-display);color:var(--deep-500);letter-spacing:-.02em}
 .rm-h{grid-area:1/1;transition:opacity .5s var(--ease),transform .5s var(--ease)}
 .rm-h:not(.on){opacity:0;transform:translateY(10px);pointer-events:none}
 .rm-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0 0;padding:0;list-style:none}
@@ -361,8 +414,22 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
     <a href="../index.html#process">How I work</a>
     <a href="../index.html#contact">Contact</a>
   </nav>
-  <a class="btn dl" href="https://drive.google.com/uc?export=download&amp;id=1DqnlkbdDUKRVwHZ6IhAFs6UXzFb3ekcj" target="_blank" rel="noopener" aria-label="Download resume (PDF)"><span class="lbl">Resume</span><span class="chip"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.5V13M3.5 8.5L8 13L12.5 8.5" stroke="currentColor" stroke-width="1.5"/></svg></span></a>
+  <div class="nav-actions"><a class="btn dl" href="https://drive.google.com/uc?export=download&amp;id=1DqnlkbdDUKRVwHZ6IhAFs6UXzFb3ekcj" target="_blank" rel="noopener" aria-label="Download resume (PDF)"><span class="lbl">Resume</span><span class="chip"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.5V13M3.5 8.5L8 13L12.5 8.5" stroke="currentColor" stroke-width="1.5"/></svg></span></a><button class="mtog" id="mtog" type="button" aria-expanded="false" aria-controls="mmenu" aria-label="Open menu"><span class="mt-i" aria-hidden="true"><i></i><i></i></span></button></div>
 </header>
+<div class="mmenu" id="mmenu" tabindex="-1" aria-label="Menu" role="dialog" aria-modal="true">
+  <nav class="mm-in" aria-label="Site">
+    <a href="../index.html"><span class="mm-n">00</span><span class="mm-t">Home</span></a>
+    <a class="now" href="../index.html#work" aria-current="page"><span class="mm-n">01</span><span class="mm-t">Work</span></a>
+    <a href="../index.html#about"><span class="mm-n">02</span><span class="mm-t">About</span></a>
+    <a href="../index.html#testimonials"><span class="mm-n">03</span><span class="mm-t">Proof</span></a>
+    <a href="../index.html#process"><span class="mm-n">04</span><span class="mm-t">How I work</span></a>
+    <a href="../index.html#contact"><span class="mm-n">05</span><span class="mm-t">Contact</span></a>
+  </nav>
+  <div class="mm-foot">
+    <a href="mailto:akashaskofficial@gmail.com">akashaskofficial@gmail.com</a>
+    <span class="mm-soc"><a href="https://www.linkedin.com/in/akashuiuxdesigner" target="_blank" rel="noopener">LinkedIn</a><a href="https://dribbble.com/Akashcreatives" target="_blank" rel="noopener">Dribbble</a><a href="https://www.behance.net/akashskumar6" target="_blank" rel="noopener">Behance</a></span>
+  </div>
+</div>
 <main class="cs" id="main">
   <div class="col head">
     <a class="back" href="../index.html#work"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg>Back</a>
@@ -561,6 +628,20 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
   };
   const ask = () => { if (!raf) raf = requestAnimationFrame(run); };
   addEventListener('scroll', ask, { passive: true }); addEventListener('resize', ask); addEventListener('load', ask); run();
+})();
+
+(() => {
+  const nav = document.querySelector('header.nav'), tog = document.getElementById('mtog'), menu = document.getElementById('mmenu');
+  const setMenu = open => {
+    nav.classList.toggle('menu-open', open);
+    tog.setAttribute('aria-expanded', open); tog.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    document.documentElement.style.overflow = open ? 'hidden' : '';
+    if (open) setTimeout(() => menu.focus({ preventScroll: true }), 300);
+  };
+  tog.addEventListener('click', () => setMenu(!nav.classList.contains('menu-open')));
+  menu.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); }, true);
+  addEventListener('keydown', e => { if (e.key === 'Escape' && nav.classList.contains('menu-open')) { setMenu(false); tog.focus(); } });
+  matchMedia('(min-width:900px)').addEventListener('change', m => { if (m.matches) setMenu(false); });
 })();
 </script>
 </body>
