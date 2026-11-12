@@ -722,6 +722,17 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
   .work-card:focus-visible .btn{display:inline-flex}
 }
 @media (prefers-reduced-motion:reduce){.vw-cur{transition:opacity .15s}}
+
+/* page transition: card -> case study */
+.pt{position:fixed;inset:0;z-index:1000;pointer-events:none;background:linear-gradient(180deg,#007862,#00250A);overflow:hidden}
+.pt-img{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.26;transform:scale(1.06)}
+.pt::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,37,10,0) 30%,rgba(0,37,10,.85))}
+.pt-txt{position:absolute;z-index:1;left:clamp(24px,6vw,96px);right:clamp(24px,6vw,96px);bottom:clamp(40px,10vh,112px);display:grid;gap:14px;color:#fff}
+.pt-no{font:500 13px/1 "Geist Mono",ui-monospace,monospace;letter-spacing:.04em;color:#5EFF88;text-transform:uppercase}
+.pt-t{margin:0;max-width:16ch;font:500 clamp(34px,5.6vw,84px)/1.02 "Archivo","Helvetica Neue",Arial,sans-serif;letter-spacing:-.025em;text-transform:uppercase}
+.pt-out .pt-txt>*{opacity:0;transform:translateY(24px)}
+.pt-txt>*{transition:opacity .45s var(--ease),transform .6s var(--ease)}
+.pt-txt>:nth-child(2){transition-delay:.06s}
 </style>
 </head>
 <body>
@@ -1917,6 +1928,41 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
   addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; x = e.clientX; y = e.clientY; queue(); }, { passive: true });
   addEventListener('scroll', queue, { passive: true });
   document.documentElement.addEventListener('pointerleave', () => cur.classList.remove('on'));
+})();
+</script>
+
+<script>
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ease = 'cubic-bezier(.76,0,.24,1)';
+  document.querySelectorAll('.work-card').forEach(card => {
+    const href = card.getAttribute('href');
+    card.addEventListener('pointerenter', () => {
+      if (card.dataset.pf) return; card.dataset.pf = 1;
+      const l = document.createElement('link'); l.rel = 'prefetch'; l.href = href; document.head.appendChild(l);
+    }, { once: true });
+    card.addEventListener('click', e => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const no = card.querySelector('.no')?.textContent.trim() || '', title = card.querySelector('h3')?.textContent.trim() || '';
+      const img = card.querySelector('.panel img')?.getAttribute('src') || '';
+      try { sessionStorage.setItem('pt', JSON.stringify({ no, title, img: img ? '../' + img : '' })); } catch (_) {}
+      if (RM) return;
+      e.preventDefault();
+      document.querySelector('.vw-cur')?.classList.remove('on');
+      const r = card.getBoundingClientRect(), W = innerWidth, H = innerHeight;
+      const ov = document.createElement('div'); ov.className = 'pt pt-out'; ov.setAttribute('aria-hidden', 'true');
+      ov.innerHTML = '<div class="pt-img"></div><div class="pt-txt"><span class="pt-no"></span><p class="pt-t"></p></div>';
+      ov.querySelector('.pt-no').textContent = 'Case study ' + no; ov.querySelector('.pt-t').textContent = title;
+      if (img) ov.querySelector('.pt-img').style.backgroundImage = 'url("' + img + '")';
+      document.body.appendChild(ov);
+      const from = `inset(${r.top}px ${W - r.right}px ${H - r.bottom}px ${r.left}px round 16px)`;
+      ov.animate([{ clipPath: from, opacity: .0 }, { clipPath: from, opacity: 1, offset: .18 }, { clipPath: 'inset(0px 0px 0px 0px round 0px)', opacity: 1 }], { duration: 820, easing: ease, fill: 'forwards' });
+      ov.querySelector('.pt-img').animate([{ opacity: 0, transform: 'scale(1.25)' }, { opacity: .26, transform: 'scale(1.06)' }], { duration: 900, easing: ease, fill: 'forwards' });
+      setTimeout(() => ov.classList.remove('pt-out'), 520);
+      setTimeout(() => { location.href = href; }, 1050);
+    });
+  });
+  addEventListener('pageshow', e => { if (e.persisted) document.querySelectorAll('.pt').forEach(n => n.remove()); });
 })();
 </script>
 
