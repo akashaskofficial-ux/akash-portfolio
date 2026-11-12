@@ -376,31 +376,22 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 .ds-img img{display:block;width:100%;height:auto}
 @media (max-width:899px){.ds-bento{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-20px;padding:0 20px 8px;scrollbar-width:none}.ds-bento::-webkit-scrollbar{display:none}.ds-tile,.ds-tile:nth-child(n+3){flex:0 0 82%;scroll-snap-align:center}}
 
-.proto{display:grid;gap:12px}
-.proto-stage{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#F3F6F6;box-shadow:0 30px 60px -36px rgba(5,12,13,.4)}
-.proto-scr{position:relative}
-.proto-scr[hidden]{display:none}
-.proto-scr.on{animation:protoIn .35s var(--ease) both}
-@keyframes protoIn{from{opacity:.35}to{opacity:1}}
-.proto-scr img{display:block;width:100%;height:auto}
-.proto-hot{position:absolute;padding:0;border:0;background:none;cursor:pointer;border-radius:6px}
-.proto-hot::before{content:"";position:absolute;inset:-4px;border-radius:8px;border:2px solid var(--neon);box-shadow:0 0 0 0 rgba(94,255,136,.6);animation:protoPulse 1.8s ease-out infinite}
-.proto-hot:not(.pri)::before{border-style:dashed;border-color:rgba(10,30,32,.45);animation:none;box-shadow:none}
-.proto-hot::after{content:"";position:absolute;inset:-12px}
-.proto-hot:hover::before,.proto-hot:focus-visible::before{background:rgba(94,255,136,.18)}
-.proto-hot:focus-visible{outline:2px solid var(--deep-500);outline-offset:6px}
-@keyframes protoPulse{0%{box-shadow:0 0 0 0 rgba(94,255,136,.7)}70%{box-shadow:0 0 0 12px rgba(94,255,136,0)}100%{box-shadow:0 0 0 0 rgba(94,255,136,0)}}
-.proto-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.slide .proto .proto-hint{margin:0;flex:1 1 320px;font-size:15px;line-height:1.5;color:var(--grey-800)}
-.slide .proto-hint b{color:var(--deep-500);font-weight:600}
-.proto-ctl{display:flex;align-items:center;gap:8px}
-.proto-n{font:500 12px/1 var(--f-mono);color:var(--grey-800);margin-right:6px}
-.proto-n b{color:var(--deep-500)}
-.proto-btn{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--white);font:500 12px/1 var(--f-mono);color:var(--deep-500);cursor:pointer}
-.proto-btn.pri{background:var(--deep-500);border-color:var(--deep-500);color:var(--neon)}
-.proto-btn:focus-visible{outline:2px solid var(--deep-500);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){.proto-hot::before{animation:none}.proto-scr.on{animation:none}}
-@media (max-width:899px){.proto-stage{margin-inline:-8px;border-radius:12px}.proto-bar{flex-direction:column;align-items:stretch;gap:10px}.slide .proto .proto-hint{flex:none;font-size:14px;line-height:1.45}.proto-ctl{justify-content:flex-end}}
+
+.vid{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#EEF2F2;box-shadow:0 30px 60px -36px rgba(5,12,13,.4)}
+.vid-v{display:block;width:100%;height:auto;aspect-ratio:1280/832}
+.vid-pp{position:absolute;right:12px;bottom:12px;display:grid;place-items:center;width:36px;height:36px;border-radius:10px;border:0;background:rgba(10,30,32,.78);color:var(--neon);cursor:pointer;opacity:0;transition:opacity .2s}
+.vid:hover .vid-pp,.vid-pp:focus-visible,.vid.paused .vid-pp{opacity:1}
+.vid-pp .i-play,.vid.paused .vid-pp .i-pause{display:none}.vid.paused .vid-pp .i-play{display:inline}
+.vid-pp:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
+.vid-steps{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.vid-steps button{display:grid;gap:8px;width:100%;padding:0;border:0;background:none;text-align:left;cursor:pointer}
+.vid-bar{height:3px;border-radius:2px;background:rgba(10,30,32,.12);overflow:hidden}
+.vid-bar i{display:block;height:100%;width:calc(var(--f,0)*100%);background:var(--deep-500)}
+.vid-l{font:500 12px/1.3 var(--f-mono);color:var(--grey-800);transition:color .2s}
+.vid-steps li.on .vid-l{color:var(--deep-500)}
+.slide p.vid-now{display:none;margin:10px 0 0;font:500 12px/1.3 var(--f-mono);color:var(--deep-500)}
+.vid-steps button:focus-visible{outline:2px solid var(--deep-500);outline-offset:4px;border-radius:4px}
+@media (max-width:899px){.vid{margin-inline:-8px;border-radius:12px}.vid-pp{opacity:1;width:32px;height:32px}.vid-steps{gap:6px}.vid-l{display:none}.slide p.vid-now{display:block}.vid-pp{bottom:auto;top:8px;right:8px}}
 /* home-page contact footer */
 .contact{position:relative;background:var(--deep-800)}
 /* the pixel field stays pinned behind everything while the heading and the key sheet scroll over it */
@@ -569,7 +560,7 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 <h2 id="s-role">Product designer and design system owner</h2>
 <p>I designed the operational screens, from the farm overview to turbine, feeder and park control, plus administration and the reports module. I also set up the design system the team works from: an atomic design system built on shadcn/ui, with Ropa Sans for headings and Roboto for data.</p>
 <div class="cons"><span class="cons-l">Constraints</span><ul><li>~130 turbines per farm</li><li>140 sensors, 60+ counters</li><li>Consequential commands</li><li>10+ report types</li></ul></div></section>
-<section class="slide" aria-labelledby="s-sw"><div class="split"><div><p class="eb">Decision 1</p><h2 id="s-sw">Switch or compare without leaving the turbine.</h2></div><div class="split-r"><p>When an operator is diagnosing one turbine, the next question is usually about another: is its neighbour behaving the same way? The usual route back to the farm overview and down again loses their place. I put a Switch control inside the turbine view instead. It opens the whole farm in place, with the same status filters, then either jumps straight to the chosen turbine or adds it to a side-by-side comparison with the metrics they pick.</p></div></div></section><section class="slide visual" aria-label="Decision 1: Interactive prototype of switching and comparing turbines"><p class="eb">Try it: switch and compare</p><figure class="fig"><div class="proto" role="group" aria-label="Clickable prototype, 6 screens"><div class="proto-stage"><div class="proto-scr on" data-i="0" data-hint="You are on turbine M130. Press <b>Switch</b> to change turbine without leaving this view."><img src="../img/case-studies/sc-proto-1.webp" srcset="../img/case-studies/sc-proto-1-960.webp 960w, ../img/case-studies/sc-proto-1.webp 1280w" sizes="(max-width:899px) 100vw, 900px" width="1280" height="832" loading="lazy" decoding="async" alt="Turbine view for M130 with a Switch button beside the turbine name"><button class="proto-hot pri" type="button" data-go="1" aria-label="Switch" style="left:69.531%;top:8.654%;width:5.000%;height:3.846%"></button></div><div class="proto-scr" data-i="1" data-hint="The whole farm opens in place, with the same status filters. <b>Pick a turbine.</b>" hidden><img src="../img/case-studies/sc-proto-2.webp" srcset="../img/case-studies/sc-proto-2-960.webp 960w, ../img/case-studies/sc-proto-2.webp 1280w" sizes="(max-width:899px) 100vw, 900px" width="1280" height="832" loading="lazy" decoding="async" alt="Turbine Selection dialog listing every turbine with status filters"><button class="proto-hot pri" type="button" data-go="2" aria-label="Select a turbine" style="left:9.219%;top:33.534%;width:6.875%;height:4.808%"></button></div><div class="proto-scr" data-i="2" data-hint="<b>Switch</b> jumps straight to that turbine. <b>Compare</b> keeps both and puts them side by side." hidden><img src="../img/case-studies/sc-proto-3.webp" srcset="../img/case-studies/sc-proto-3-960.webp 960w, ../img/case-studies/sc-proto-3.webp 1280w" sizes="(max-width:899px) 100vw, 900px" width="1280" height="832" loading="lazy" decoding="async" alt="Turbine Selection with one turbine selected and Compare and Switch buttons enabled"><button class="proto-hot" type="button" data-go="0" aria-label="Switch" style="left:82.969%;top:87.861%;width:9.609%;height:4.808%"></button><button class="proto-hot pri" type="button" data-go="3" aria-label="Compare" style="left:71.797%;top:87.861%;width:9.609%;height:4.808%"></button></div><div class="proto-scr" data-i="3" data-hint="Choose what to compare, grouped by category. <b>Tick a metric.</b>" hidden><img src="../img/case-studies/sc-proto-4.webp" srcset="../img/case-studies/sc-proto-4-960.webp 960w, ../img/case-studies/sc-proto-4.webp 1280w" sizes="(max-width:899px) 100vw, 900px" width="1280" height="832" loading="lazy" decoding="async" alt="Select Comparison Parameters dialog with metric checkboxes grouped by category"><button class="proto-hot pri" type="button" data-go="4" aria-label="Select Power Output" style="left:10.469%;top:36.659%;width:16.250%;height:6.130%"></button><button class="proto-hot" type="button" data-go="2" aria-label="Cancel" style="left:72.969%;top:86.058%;width:6.172%;height:4.808%"></button></div><div class="proto-scr" data-i="4" data-hint="<b>View Comparison</b> to see the two turbines together." hidden><img src="../img/case-studies/sc-proto-5.webp" srcset="../img/case-studies/sc-proto-5-960.webp 960w, ../img/case-studies/sc-proto-5.webp 1280w" sizes="(max-width:899px) 100vw, 900px" width="1280" height="832" loading="lazy" decoding="async" alt="Select Comparison Parameters with View Comparison enabled"><button class="proto-hot pri" type="button" data-go="5" aria-label="View Comparison" style="left:80.703%;top:86.058%;width:11.016%;height:4.808%"></button><button class="proto-hot" type="button" data-go="2" aria-label="Cancel" style="left:72.969%;top:86.058%;width:6.172%;height:4.808%"></button></div><div class="proto-scr" data-i="5" data-hint="Both turbines, metric by metric, with the differences flagged. <b>Close</b> returns to the turbine." hidden><img src="../img/case-studies/sc-proto-6.webp" srcset="../img/case-studies/sc-proto-6-960.webp 960w, ../img/case-studies/sc-proto-6.webp 1280w" sizes="(max-width:899px) 100vw, 900px" width="1280" height="832" loading="lazy" decoding="async" alt="Turbine Comparison: two turbines side by side with operational and temperature metrics"><button class="proto-hot pri" type="button" data-go="0" aria-label="Close" style="left:85.391%;top:10.817%;width:5.938%;height:4.327%"></button></div></div><div class="proto-bar"><p class="proto-hint" aria-live="polite">You are on turbine M130. Press <b>Switch</b> to change turbine without leaving this view.</p><div class="proto-ctl"><span class="proto-n"><b>1</b> / 6</span><button class="proto-btn" type="button" data-act="restart">Restart</button><button class="proto-btn pri" type="button" data-act="next">Next step</button></div></div></div><figcaption>Built from the Figma prototype. Turbine names and values are placeholders.</figcaption></figure></section><section class="slide" aria-labelledby="s-d1"><div class="split"><div><p class="eb">Decision 2</p><h2 id="s-d1">Each level gets only the controls it needs.</h2></div>
+<section class="slide" aria-labelledby="s-sw"><div class="split"><div><p class="eb">Decision 1</p><h2 id="s-sw">Switch or compare without leaving the turbine.</h2></div><div class="split-r"><p>When an operator is diagnosing one turbine, the next question is usually about another: is its neighbour behaving the same way? The usual route back to the farm overview and down again loses their place. I put a Switch control inside the turbine view instead. It opens the whole farm in place, with the same status filters, then either jumps straight to the chosen turbine or adds it to a side-by-side comparison with the metrics they pick.</p></div></div></section><section class="slide visual" aria-label="Decision 1: Walkthrough of switching and comparing turbines"><p class="eb">Switch and compare, in motion</p><figure class="fig"><div class="vid"><video class="vid-v" src="../img/case-studies/sc-switch-compare.mp4" poster="../img/case-studies/sc-switch-compare-poster.webp" width="1280" height="832" muted loop playsinline preload="metadata" aria-label="Walkthrough: from the turbine view, Switch opens the farm in place; a turbine is picked, Compare is chosen, a metric is ticked, and the two turbines appear side by side."></video><button class="vid-pp" type="button" aria-label="Pause video"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path class="i-pause" d="M3 2h3v10H3zM8 2h3v10H8z" fill="currentColor"/><path class="i-play" d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg></button></div><ol class="vid-steps"><li data-t="0"><button type="button" aria-label="Jump to: Switch"><span class="vid-bar"><i></i></span><span class="vid-l">01 Switch</span></button></li><li data-t="3.0"><button type="button" aria-label="Jump to: Pick a turbine"><span class="vid-bar"><i></i></span><span class="vid-l">02 Pick a turbine</span></button></li><li data-t="5.75"><button type="button" aria-label="Jump to: Compare"><span class="vid-bar"><i></i></span><span class="vid-l">03 Compare</span></button></li><li data-t="8.5"><button type="button" aria-label="Jump to: Choose metrics"><span class="vid-bar"><i></i></span><span class="vid-l">04 Choose metrics</span></button></li><li data-t="13.8"><button type="button" aria-label="Jump to: Side by side"><span class="vid-bar"><i></i></span><span class="vid-l">05 Side by side</span></button></li></ol><p class="vid-now" aria-hidden="true"></p><figcaption>Recorded from the Figma prototype. Turbine names and values are placeholders.</figcaption></figure></section><section class="slide" aria-labelledby="s-d1"><div class="split"><div><p class="eb">Decision 2</p><h2 id="s-d1">Each level gets only the controls it needs.</h2></div>
 <div class="split-r"><p>Instead of scaling one screen up or down, I gave each level its own job. The farm view answers “is anything wrong?”, the feeder view groups turbines the way the grid does, and the turbine view holds the detail. Detailed controls stay on the individual turbine; feeder and park get group commands only, with no pitch control and no reset.</p></div></div></section>
 <div class="rm" id="levels"><section class="slide rm-slide" aria-label="Decision 2: From the farm down to one turbine"><p class="eb">From the farm down to one turbine</p><h3 class="rm-head"><span class="rm-h on" data-i="0">01&nbsp;&nbsp;Farm</span><span class="rm-h" data-i="1">02&nbsp;&nbsp;Feeder</span><span class="rm-h" data-i="2">03&nbsp;&nbsp;Turbine</span></h3><ol class="rm-steps"><li class="rm-step on" data-i="0"><span class="rm-bar"><i></i></span><span class="rm-l">01 Farm</span></li><li class="rm-step" data-i="1"><span class="rm-bar"><i></i></span><span class="rm-l">02 Feeder</span></li><li class="rm-step" data-i="2"><span class="rm-bar"><i></i></span><span class="rm-l">03 Turbine</span></li></ol><div class="rm-stage"><div class="rm-shot shot on" data-i="0"><div class="pan"><img class="shot-img" src="../img/case-studies/sc-overview.webp" srcset="../img/case-studies/sc-overview-960.webp 960w, ../img/case-studies/sc-overview.webp 1280w" sizes="(max-width:899px) 100vw, 800px" width="1280" height="832" loading="lazy" decoding="async" alt="Farm overview: weather and generation figures on top, status filters, and a card for every turbine on the farm"></div></div><div class="rm-shot shot" data-i="1"><div class="pan"><img class="shot-img" src="../img/case-studies/sc-feeder.webp" srcset="../img/case-studies/sc-feeder-960.webp 960w, ../img/case-studies/sc-feeder.webp 1280w" sizes="(max-width:899px) 100vw, 800px" width="1280" height="832" loading="lazy" decoding="async" alt="Feeder view: the same turbines grouped into columns by feeder, each with its own count"></div></div><div class="rm-shot shot" data-i="2"><div class="pan"><img class="shot-img" src="../img/case-studies/sc-turbine.webp" srcset="../img/case-studies/sc-turbine-960.webp 960w, ../img/case-studies/sc-turbine.webp 1280w" sizes="(max-width:899px) 100vw, 800px" width="1280" height="832" loading="lazy" decoding="async" alt="Turbine view: nacelle diagram, wind direction, pitch gauges, live values and the active-errors list"></div></div></div><div class="rm-foot"><span></span><span class="rm-count"><b>01</b> / 03</span></div></section></div>
 <section class="slide" aria-labelledby="s-d2"><div class="split"><div><p class="eb">Decision 3</p><h2 id="s-d2">Status first, controls second.</h2></div>
@@ -756,23 +747,29 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 })();
 </script>
 
+
+
 <script>
 (() => {
-  document.querySelectorAll('.proto').forEach(p => {
-    const scr = [...p.querySelectorAll('.proto-scr')], hint = p.querySelector('.proto-hint'), n = p.querySelector('.proto-n b');
-    const go = (i, focus) => {
-      scr.forEach((s, k) => { const on = k === i; s.classList.toggle('on', on); s.hidden = !on; });
-      hint.innerHTML = scr[i].dataset.hint; n.textContent = i + 1;
-      scr[i].querySelector('img').loading = 'eager'; const nx = scr[i + 1]; if (nx) nx.querySelector('img').loading = 'eager';
-      if (focus) { const h = scr[i].querySelector('.proto-hot.pri'); if (h) h.focus({preventScroll: true}); }
+  document.querySelectorAll('.vid').forEach(box => {
+    const v = box.querySelector('video'), pp = box.querySelector('.vid-pp');
+    const fig = box.closest('figure'), items = [...fig.querySelectorAll('.vid-steps li')];
+    const ts = items.map(li => +li.dataset.t), now = fig.querySelector('.vid-now');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let userPaused = reduce, inView = false;
+    const sync = () => { box.classList.toggle('paused', v.paused); pp.setAttribute('aria-label', v.paused ? 'Play video' : 'Pause video'); };
+    const play = () => { if (!userPaused && inView) v.play().catch(() => {}); };
+    new IntersectionObserver(es => es.forEach(e => { inView = e.isIntersecting; if (inView) { v.preload = 'auto'; play(); } else v.pause(); }), {threshold: .35}).observe(box);
+    v.addEventListener('play', sync); v.addEventListener('pause', sync); sync();
+    pp.addEventListener('click', () => { if (v.paused) { userPaused = false; inView = true; v.play(); } else { userPaused = true; v.pause(); } });
+    const tick = () => {
+      const t = v.currentTime, d = v.duration || 20;
+      items.forEach((li, k) => { const a = ts[k], b = ts[k + 1] ?? d; const f = Math.min(1, Math.max(0, (t - a) / (b - a)));
+        li.style.setProperty('--f', f.toFixed(3)); const on = t >= a && t < b; li.classList.toggle('on', on); if (on && now) now.textContent = li.querySelector('.vid-l').textContent; });
+      requestAnimationFrame(tick);
     };
-    p.addEventListener('click', e => {
-      const h = e.target.closest('.proto-hot'); if (h) { go(+h.dataset.go, e.detail === 0); return; }
-      const b = e.target.closest('.proto-btn'); if (!b) return;
-      const cur = scr.findIndex(s => s.classList.contains('on'));
-      if (b.dataset.act === 'restart') go(0);
-      else { const pri = scr[cur].querySelector('.proto-hot.pri'); go(pri ? +pri.dataset.go : 0); }
-    });
+    requestAnimationFrame(tick);
+    items.forEach((li, k) => li.querySelector('button').addEventListener('click', () => { v.currentTime = ts[k] + .01; userPaused = false; inView = true; v.play().catch(() => {}); }));
   });
 })();
 </script>
