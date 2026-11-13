@@ -14,7 +14,7 @@
   color-scheme:light;
   --deep-900:#050C0D;--deep-800:#061217;--deep-500:#112529;
   --neon-25:#E7FFED;--neon-50:#DCFFE5;--neon-100:#C8FFD9;--neon:#5EFF88;--neon-700:#2A9B5C;--neon-900:#154D32;
-  --grey-800:#536F74;--muted-200:#A7B7AD;--muted-400:#6B8176;--white:#FFFFFF;
+  --grey-800:#536F74;--muted-200:#A7B7AD;--muted-400:#4D6358;--white:#FFFFFF;
   --line:rgba(17,37,41,.1);
   --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
   --f-body:"Hanken Grotesk","Helvetica Neue",Arial,sans-serif;
@@ -77,7 +77,7 @@ svg .m{font-family:var(--f-mono)} svg .b{font-family:var(--f-body)}
   .menu-open + .mmenu .mm-in a:nth-child(4){transition-delay:.27s}
   .menu-open + .mmenu .mm-in a:nth-child(5){transition-delay:.32s}
   .menu-open + .mmenu .mm-in a:nth-child(6){transition-delay:.37s}
-  .mm-n{font:500 11px/1 var(--f-mono);color:var(--muted-400);letter-spacing:.06em}
+  .mm-n{font:500 11px/1 var(--f-mono);color:var(--muted-200);letter-spacing:.06em}
   .mm-t{font:600 clamp(34px,9vw,56px)/1 var(--f-display);text-transform:uppercase;letter-spacing:-.02em}
   .mm-in a.now,.mm-in a:hover{color:var(--neon)}
   .mm-in a.now .mm-n{color:var(--neon)}
@@ -200,8 +200,9 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 .rm-bar{display:block;height:3px;border-radius:2px;background:rgba(21,77,50,.15);overflow:hidden}
 .rm-bar i{display:block;height:100%;width:var(--f,0%);background:var(--neon-900);border-radius:inherit}
 .rm-step:first-child .rm-bar i{width:var(--f,100%)}
-.rm-l{display:block;margin-top:10px;padding-left:16px;font:500 12px/1.3 var(--f-mono);color:var(--neon-900);opacity:.48;transition:opacity .4s var(--ease)}
-.rm-step.on .rm-l{opacity:1}
+/* inactive steps: lighter weight and a softer tone that still passes 4.5:1; the active step is bold */
+.rm-l{display:block;margin-top:10px;padding-left:16px;font:400 12px/1.3 var(--f-mono);color:var(--neon-900);opacity:.8;transition:opacity .4s var(--ease)}
+.rm-step.on .rm-l{opacity:1;font-weight:700}
 .rm-stage{display:grid;margin:clamp(24px,3.5vw,36px) clamp(0px,2.5vw,24px) 0}
 .rm-shot{grid-area:1/1;opacity:0;transform:translateY(18px) scale(.985);transition:opacity .6s var(--ease),transform .7s var(--ease);will-change:opacity,transform}
 .rm-shot.on{opacity:1;transform:none}
@@ -239,7 +240,7 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 .nx-txt{display:flex;flex-direction:column;gap:10px;padding:20px 8px 8px;flex:1}
 .nx-no{font:500 16px/1.2 "Epilogue",var(--f-body);color:var(--neon)}
 .nx-card h3{margin:0;font:500 clamp(17px,1.5vw,20px)/1.2 var(--f-display);letter-spacing:-.02em;text-transform:uppercase;color:var(--white);transition:color .3s var(--ease)}
-.nx-card p{margin:0;font:400 13px/1.4 var(--f-body);color:rgba(255,255,255,.5)}
+.nx-card p{margin:0;font:400 13px/1.4 var(--f-body);color:rgba(255,255,255,.72)}
 .nx-btn{align-self:flex-start;margin:12px 8px 10px;height:40px;padding-left:14px;gap:10px;font-size:12px}
 .nx-btn .chip{width:32px;height:32px;border-radius:8px;overflow:hidden}
 .nx-btn .pill{display:block;height:1.2em;line-height:1.2;overflow:hidden}
@@ -270,7 +271,7 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
   .pm-raw{position:relative;background:#F3F6F6;overflow:hidden}
   .pm-l{display:block;margin-bottom:12px;font:500 11px/1.2 var(--f-mono);color:#536F74}
   .pm-rows{display:grid;gap:6px;font:400 12px/1.3 var(--f-mono);color:var(--deep-500);white-space:pre}
-  .pm-rows span:nth-last-child(-n+3){opacity:.55}.pm-rows span:last-child{opacity:.25}
+  .pm-rows span:nth-last-child(-n+3){opacity:.78}
   .pm-more{display:block;margin-top:12px;font-size:13px;color:#536F74}
   .pm-q{background:var(--white);border:1px solid #DCE5E6}
   .pm-qt{margin:0;font:500 19px/1.35 var(--f-body);color:var(--deep-500)}
