@@ -1,2 +1,8 @@
 .DS_Store
 *.before-*.html
+
+# working files: kept locally, never deployed
+portfolio.src.html
+akash-portfolio-sample.html
+phone.html
+portrait.png
