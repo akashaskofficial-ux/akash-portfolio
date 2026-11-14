@@ -252,9 +252,8 @@ body.no-dust .dust{opacity:0}
 @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 
 /* ---------- code tag ---------- */
-.codetag{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:8px;font:400 12px/1 var(--f-mono);background:var(--deep-600);color:var(--neon);border:1px solid rgba(107,129,118,.6)}
-.codetag::before{content:"";width:8px;height:10px;background:var(--neon);animation:blink 1.1s steps(1) infinite}
-.mint .codetag{background:var(--neon-25);color:var(--neon-ink);border-color:var(--muted-200)}
+.codetag{display:inline-block;font:500 13px/1.3 var(--f-mono);letter-spacing:.02em;color:var(--neon)}   /* plain label: no box, no cursor */
+.mint .codetag{color:var(--neon-ink)}
 
 /* ---------- WORKS (Figma 92:369): scroll parallax cards ---------- */
 .works{background:#061217}
@@ -513,7 +512,7 @@ body.no-dust .dust{opacity:0}
 .proc .display{color:var(--deep-500)}
 .proc .body-l{color:var(--ink-60)}
 .proc .eyebrow{color:var(--muted-400)}
-.proc .codetag{background:var(--neon-25);color:var(--neon-ink);border-color:var(--muted-200)}
+.proc .codetag{color:var(--neon-ink)}
 .pr-intro{padding-top:clamp(80px,9vw,128px)}
 .pr-intro .sec-head{margin-bottom:0}
 .pr-stage{position:relative;height:calc(100svh + 150vh)}
@@ -645,6 +644,7 @@ body.no-dust .dust{opacity:0}
 .ktoast{position:absolute;left:50%;bottom:14px;transform:translate(-50%,10px);padding:9px 14px;border-radius:var(--r-chip);background:var(--deep-500);color:var(--neon);font:500 12px/1 var(--f-mono);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .4s var(--ease)}
 .ktoast.show{opacity:1;transform:translate(-50%,0)}
 .kpanel .codetag{display:flex;width:max-content;margin:0 auto 12px}
+.about .codetag,.kpanel .codetag{color:var(--neon-ink)}
 .khead{margin:0 auto 10px;max-width:24ch;text-align:center;font:500 clamp(26px,2.6vw,38px)/1 var(--f-display);letter-spacing:-.02em;text-transform:uppercase;text-wrap:balance;color:var(--deep-500)}
 .fbar{align-items:center;padding-top:8px}
 .contact .footer::before{content:"";position:absolute;left:0;right:0;bottom:0;height:200px;background:linear-gradient(rgba(6,18,23,0),#061217 62%);pointer-events:none}
@@ -961,7 +961,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
 <section class="band sec about" id="about" data-tone="mint">
   <div class="wrap">
     <div class="sec-head about-head">
-      <span class="codetag">about.me();</span>
+      <span class="codetag">About me</span>
       <span class="eyebrow">03 · Story</span>
       <h2 class="display split">I ask “why” a lot.<br>Then I make it make sense.</h2>
     </div>
@@ -1011,7 +1011,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
 <section class="testi" id="testimonials" data-tone="dark" data-dust="off">
   <div class="t-intro">
     <div class="t-head">
-      <span class="codetag">client.words();</span>
+      <span class="codetag">Client words</span>
       <span class="eyebrow">04 · Testimonials</span>
       <h2 class="t-title"><span class="split">Good work.</span><span class="split">Even better partnerships.</span></h2>
     </div>
@@ -1068,7 +1068,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
 <section class="proc" id="process" data-tone="mint">
   <div class="pr-intro band">
     <div class="sec-head">
-      <span class="codetag">run(process);</span>
+      <span class="codetag">How I work</span>
       <span class="eyebrow">05 · Process</span>
       <h2 class="display split">From the right problem to a buildable product.</h2>
       <p class="body-l">The same route on every project, whatever the product.</p>
@@ -1098,7 +1098,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
   <footer class="footer band" id="links">
     <div class="wrap">
       <div class="kpanel" id="kpanel">
-        <span class="codetag" id="typer">hire(akash);</span>
+        <span class="codetag">Say hello</span>
         <h2 class="khead split">Let's build something together.</h2>
         <p class="khint" aria-hidden="true">Psst, these work on your keyboard too: <kbd>M</kbd><kbd>L</kbd><kbd>R</kbd><kbd>D</kbd><kbd>B</kbd></p>
         <ul class="keys">
@@ -2015,8 +2015,6 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
   }
 
   // typing code tag
-  const typer = $('#typer'); const phrases = ['hire(akash);', 'say(hello);', 'book(chat);']; let pi = 0;
-  if (!RM) setInterval(() => { pi = (pi + 1) % phrases.length; const full = phrases[pi]; let n = 0; const t = setInterval(() => { typer.textContent = full.slice(0, ++n); if (n >= full.length) clearInterval(t); }, 55); }, 3200);
 
   // ---------- pixel canvases ----------
   const N = '#5EFF88', N7 = '#2A9B5C', N9 = '#154D32', D6 = '#0E1F22', D4 = '#283C40', M25 = '#E7FFED', M50 = '#DCFFE5', INK = '#112529';
