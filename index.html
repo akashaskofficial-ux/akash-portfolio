@@ -406,6 +406,8 @@ body.no-dust .dust{opacity:0}
 .about .eyebrow{color:var(--grey-800)}
 .about .about-head{justify-items:start;text-align:left;margin-bottom:clamp(40px,5vw,64px)}
 .about .about-head .display{max-width:none}
+/* the About heading is two set lines; on phones it scales down just enough to keep each line on one row */
+@media (max-width:760px){.about-head .display{font-size:min(34px,calc((100vw - 40px) / 13.9))}}
 .about .about-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(32px,5vw,72px);align-items:start}
 .jrn-label{margin:40px 0 14px}
 .id-spot{position:relative;min-height:calc(var(--w) * 1.4334 + 72px)}
@@ -960,7 +962,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
     <div class="sec-head about-head">
       <span class="codetag">about.me();</span>
       <span class="eyebrow">03 · Story</span>
-      <h2 class="display split">I ask “why” a lot. Then I make it make sense.</h2>
+      <h2 class="display split">I ask “why” a lot.<br>Then I make it make sense.</h2>
     </div>
     <div class="about-grid">
       <div class="about-copy">
@@ -1226,13 +1228,20 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
 
   // split headings into chars (words kept whole)
   let ci = 0;
+  // a <br> in the heading is kept as a forced line break
   $$('.split').forEach(el => {
-    const words = el.textContent.trim().split(/\s+/); el.setAttribute('aria-label', el.textContent.trim()); el.textContent = '';
+    const tmp = document.createElement('div');
+    const lines = el.innerHTML.split(/<br\s*\/?>/i).map(h => { tmp.innerHTML = h; return tmp.textContent.trim(); });
+    el.setAttribute('aria-label', lines.join(' ')); el.textContent = '';
     let k = 0;
-    words.forEach((w, wi) => {
-      const ws = document.createElement('span'); ws.className = 'w'; ws.setAttribute('aria-hidden', 'true');
-      [...w].forEach(ch => { const c = document.createElement('span'); c.className = 'c'; c.textContent = ch; c.style.setProperty('--i', k++); ws.appendChild(c); });
-      el.appendChild(ws); if (wi < words.length - 1) el.appendChild(document.createTextNode(' '));
+    lines.forEach((line, li) => {
+      const words = line.split(/\s+/).filter(Boolean);
+      words.forEach((w, wi) => {
+        const ws = document.createElement('span'); ws.className = 'w'; ws.setAttribute('aria-hidden', 'true');
+        [...w].forEach(ch => { const c = document.createElement('span'); c.className = 'c'; c.textContent = ch; c.style.setProperty('--i', k++); ws.appendChild(c); });
+        el.appendChild(ws); if (wi < words.length - 1) el.appendChild(document.createTextNode(' '));
+      });
+      if (li < lines.length - 1) el.appendChild(document.createElement('br'));
     });
   });
   $$('.wcard, .stat, .timeline li').forEach((el, i) => { el.classList.add('rise'); el.style.setProperty('--delay', (i % 3) * 90 + 'ms'); });
