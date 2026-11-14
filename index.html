@@ -264,7 +264,7 @@ body.no-dust .dust{opacity:0}
 .works{padding-block:0}
 .works-intro{padding:128px 16px 24px}
 .works-intro .works-head{margin:0}
-.works-stage{position:relative;height:calc((var(--n,4) - 1 + .6) * 100vh + 100vh)}
+.works-stage{position:relative;height:calc((var(--n,4) - 1 + .6) * 60vh + 100vh)}
 .works-sticky{position:sticky;z-index:41;top:0;height:100vh;height:100svh;overflow:hidden}
 .work-list{position:absolute;inset:0;z-index:1;perspective:1800px}
 .work-list .work-card{position:absolute;left:50%;top:50%;width:min(1080px,74vw,calc((100svh - 190px) * 1176 / 633));margin:0;
@@ -1275,7 +1275,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
   // works: pinned stage. Card 1 starts centred; scrolling moves the current card off to the top-right
   // while the next rises from the bottom-left corner. Cards are small in the corners, full size in the centre.
   const stage = $('.works-stage'), wcards = $$('.work-card');
-  const NW = wcards.length, HOLD = .22, TAIL = .6;          // HOLD: share of each step spent resting at the centre
+  const NW = wcards.length, HOLD = .06, TAIL = .6;          // HOLD: share of each step spent resting at the centre (each step is 60vh of scroll)
   const step = x => { const f = Math.min(1, Math.max(0, (x - HOLD) / (1 - 2 * HOLD))); return f * f * (3 - 2 * f); };
   const workFx = () => {
     const vw = innerWidth, vh = innerHeight;
@@ -1309,6 +1309,35 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
     stage.style.marginTop = Math.min(0, Math.round(want - pad - free)) + 'px';
   };
   if (!RM) { let q = false; addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(() => { workFx(); q = false; }); } }, { passive: true }); addEventListener('resize', () => { workGap(); workFx(); }); workGap(); workFx(); }
+
+  // card snap: a light scroll is enough to move to the next card. When scrolling settles between two cards,
+  // finish the move in the direction the person was going (or settle back if they barely moved).
+  if (!RM) {
+    let lastY = scrollY, dir = 0, idle = 0, snapping = false, snapT = 0;
+    const span = () => { const top = stage.getBoundingClientRect().top + scrollY; return { top, len: stage.offsetHeight - innerHeight }; };
+    const snap = () => {
+      if (snapping || $('#nav').classList.contains('menu-open')) return;
+      const { top, len } = span(); if (len <= 0) return;
+      const total = NW - 1 + TAIL, T = (scrollY - top) / len * total;
+      if (T <= .02 || T >= NW - 1 - .02) return;             // before the first card or past the last one: scroll freely
+      const base = Math.floor(T), f = T - base;
+      const to = f < .04 ? base : f > .96 ? base + 1 : dir > 0 ? base + 1 : dir < 0 ? base : Math.round(T);
+      const y = Math.round(top + to / total * len);
+      if (Math.abs(y - scrollY) < 2) return;
+      // a new wheel or touch can interrupt the glide, so the lock is released by a timer, never by the animation alone
+      snapping = true; clearTimeout(snapT); snapT = setTimeout(() => { snapping = false; lastY = scrollY; }, 800);
+      if (window.__lenis && !window.__lenis.isStopped) window.__lenis.scrollTo(y, { duration: .75, easing: t => 1 - Math.pow(1 - t, 3) });
+      else scrollTo({ top: y, behavior: 'smooth' });
+    };
+    let touching = false;
+    addEventListener('scroll', () => {
+      const y = scrollY; if (Math.abs(y - lastY) > .5) dir = Math.sign(y - lastY); lastY = y;
+      clearTimeout(idle); if (!snapping && !touching) idle = setTimeout(snap, 140);
+    }, { passive: true });
+    addEventListener('touchstart', () => { touching = true; clearTimeout(idle); }, { passive: true });
+    addEventListener('wheel', () => { if (snapping) { snapping = false; clearTimeout(snapT); } }, { passive: true });
+    addEventListener('touchend', () => { touching = false; clearTimeout(idle); idle = setTimeout(snap, 160); }, { passive: true });
+  }
 
 
   // pin guard: some mobile browsers drop position:sticky. If a pinned stage's scene is not where sticky would
