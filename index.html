@@ -695,7 +695,7 @@ body.no-dust .dust{opacity:0}
   .pr-stage{height:auto}
   .pr-sticky{position:relative;height:auto;padding-block:48px 96px}
   .works-stage{height:auto}
-  .works-sticky{position:static;height:auto;overflow:visible;padding-block:96px}
+  .works-sticky{position:static;height:auto;overflow:visible;padding-block:40px 96px}
   .work-list{position:static;display:grid;gap:40px;justify-items:center}
   .work-list .work-card{position:relative;left:auto;top:auto;transform:none;opacity:1}
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -1291,7 +1291,16 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
       c.tabIndex = a < .5 ? 0 : -1;
     });
   };
-  if (!RM) { let q = false; addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(() => { workFx(); q = false; }); } }, { passive: true }); addEventListener('resize', workFx); workFx(); }
+  // card 1 sits centred in a full-height stage, which leaves a tall gap under the heading. Pull the stage up
+  // so the heading-to-card gap stays near 64px (48px on phones) at any viewport height.
+  const wsticky = $('.works-sticky'), wintro = $('.works-intro');
+  const workGap = () => {
+    const want = innerWidth < 760 ? 48 : 64;
+    const pad = parseFloat(getComputedStyle(wintro).paddingBottom) || 0;
+    const free = (wsticky.clientHeight - wcards[0].offsetHeight) / 2;
+    stage.style.marginTop = Math.min(0, Math.round(want - pad - free)) + 'px';
+  };
+  if (!RM) { let q = false; addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(() => { workFx(); q = false; }); } }, { passive: true }); addEventListener('resize', () => { workGap(); workFx(); }); workGap(); workFx(); }
 
 
   // pin guard: some mobile browsers drop position:sticky. If a pinned stage's scene is not where sticky would
