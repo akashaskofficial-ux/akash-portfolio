@@ -231,7 +231,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .hero.fx .tile:hover{background:var(--neon-200)}
 .hero-dark{position:absolute;inset:0;z-index:0;background:#061217;opacity:0;pointer-events:none}
 .hero-glow{z-index:3;mix-blend-mode:soft-light}
-.hero.amb .hero-glow{opacity:var(--ga,0);transition:none}
+.hero.amb .hero-glow{display:none}
+.amb-glow{position:absolute;z-index:3;left:-260px;top:-260px;width:520px;height:520px;border-radius:50%;pointer-events:none;opacity:0;mix-blend-mode:soft-light;will-change:transform,opacity;background:radial-gradient(closest-side,rgba(255,255,255,.55),rgba(255,255,255,.18) 55%,rgba(255,255,255,0))}
+.hero-cells i.rp .bk{background:#fff;color:var(--deep-500);border:0}
+.hero-cells i.rp em{display:none}
 .dust{position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;transition:opacity .6s var(--ease)}
 body.no-dust .dust{opacity:0}
 .spark{position:fixed;inset:0;width:100%;height:100%;z-index:70;pointer-events:none}
@@ -1646,9 +1649,9 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
     const rnd = i => { const v = Math.sin(i * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
     const GRAD = 'radial-gradient(60% 46% at 50% 10%,rgba(255,255,255,.28),rgba(255,255,255,0))', LIN = 'linear-gradient(180deg,#E0F5EE 0%,#CFF5E3 31.555%,#A6F5C7 65.364%,#5EFF88 112.7%)';
     // touch screens have no hover, so the glass idles on its own: a soft band of light sweeps corner to corner
-    // every few seconds, lifting the tiles it passes, and now and then a single tile turns over and back.
-    const AMB = !FINE;
-    let ampNext = 0, ampPool = [];
+    // every few seconds and the tiles it passes lean towards it. A tap drops a small ripple into the glass.
+    const AMB = !FINE, ripples = [];
+    let ambGlow = null;
     let parked = false, cellEls = [], geo = null, lite = false, hov = null, hSm = 0, heroVisible = true, last = performance.now(), dkNow = -1;
     const mouse = { x: 0, y: 0, on: false }, tilt = { x: 0, y: 0 };
     const vec = (cx, cy, i) => { const dx = cx / geo.hw - .5, dy = cy / geo.hh - .5, dz = .4 + (i % 3) * .25, l = Math.hypot(dx, dy, dz) || 1; return [dx / l, dy / l, dz / l]; };
@@ -1679,10 +1682,9 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
         layers.push(`${GRAD} ${(-x).toFixed(1)}px ${(-y).toFixed(1)}px/${hw}px ${hh}px no-repeat`, `${LIN} ${(-x).toFixed(1)}px ${(-y).toFixed(1)}px/${hw}px ${hh}px no-repeat`);
         c.querySelector('.f').style.background = layers.join(',');
       });
-      const inView = cellEls.filter(c => c._vis && c.offsetTop + geo.gy + geo.ch < Math.min(hh, innerHeight * 1.1));
-      ampPool = inView.filter(c => !c.classList.contains('plain')); if (ampPool.length < 6) ampPool = inView;
       geo.span = 6 + Math.ceil(Math.min(hh, innerHeight) / geo.ch);
       hero.classList.toggle('amb', AMB);
+      if (AMB && !ambGlow) { ambGlow = document.createElement('div'); ambGlow.className = 'amb-glow'; ambGlow.setAttribute('aria-hidden', 'true'); hero.appendChild(ambGlow); }
     };
 
     const frame = now => {
@@ -1699,25 +1701,33 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
       const T = `perspective(1400px) rotateX(${tilt.x.toFixed(2)}deg) rotateY(${tilt.y.toFixed(2)}deg)`;
       cells.style.transform = T;
       let wpos = -99, wamp = 0;
-      if (AMB && h < .3) {
-        const P = 10, u = (t % P) / P * 1.6;                 // sweep for the first ~60% of each cycle, then rest
-        if (u < 1) { wpos = -3 + u * (geo.span + 6); wamp = Math.sin(u * Math.PI) ** .5 * (1 - h / .3); }
-        const f = Math.max(0, Math.min(1, wpos / geo.span));
-        hero.style.setProperty('--mx', (f * geo.hw).toFixed(0) + 'px'); hero.style.setProperty('--my', (f * Math.min(geo.hh, innerHeight)).toFixed(0) + 'px');
-        hero.style.setProperty('--ga', (wamp * .9).toFixed(3));
-        if (h < .05 && now > ampNext && ampPool.length) {
-          const c = ampPool[Math.floor(Math.random() * ampPool.length)];
-          if (!c.classList.contains('on')) { c.classList.add('on'); clearTimeout(c._t); c._t = setTimeout(() => c.classList.remove('on'), 1700 + Math.random() * 900); }
-          ampNext = now + 1400 + Math.random() * 1600;
+      if (AMB && ambGlow) {
+        // one slow, eased pass every 14s (about 9s moving, 5s resting); only transform and opacity change
+        const P = 14, u = (t % P) / P / .64;
+        if (u < 1 && h < .3) {
+          const e = u * u * (3 - 2 * u);
+          wpos = -4 + e * (geo.span + 8); wamp = Math.sin(u * Math.PI) ** 2 * (1 - h / .3);
         }
+        const f = (wpos + 4) / (geo.span + 8), vh = Math.min(geo.hh, innerHeight);
+        ambGlow.style.transform = `translate3d(${(f * geo.hw).toFixed(1)}px,${(f * vh).toFixed(1)}px,0)`;
+        ambGlow.style.opacity = (wamp * .85).toFixed(3);
       }
+      for (let r = ripples.length - 1; r >= 0; r--) if (now - ripples[r].t0 > 1800) ripples.splice(r, 1);
       const L = h * Math.max(geo.hw, geo.hh) * .9, fade = 1 - Math.max(0, Math.min(1, (h - .5) / .45));
       for (const c of cellEls) {
         if (!c._vis) continue;
         c._lift += ((c === hov && h < .05 ? 1 : 0) - c._lift) * k(7); if (c._lift < .002) c._lift = 0;
-        const wd = c._col + c._row - wpos, w = wamp ? wamp * Math.exp(-wd * wd / 3.2) : 0;
-        const lf = Math.max(c._lift, w * .55), bob = (lite ? 0 : Math.sin(t * .8 + c._ph) * 5 * (1 - h));
-        const tr = `translate3d(${(c._d[0] * L).toFixed(1)}px,${(c._d[1] * L).toFixed(1)}px,${(bob + lf * 46 + c._d[2] * L * .6).toFixed(1)}px) rotateX(${(c._spin[0] * h + c._lift * mouse.y * 5 - w * 7).toFixed(2)}deg) rotateY(${(c._spin[1] * h + c._lift * mouse.x * 6 + w * 11).toFixed(2)}deg) rotateZ(${(c._spin[2] * h).toFixed(2)}deg)`;
+        const wd = c._col + c._row - wpos, w = wamp ? wamp * Math.exp(-wd * wd / 7) : 0;
+        // tap ripple: a ring that runs outward from the tap, dips the glass it crosses and fades within ~3 tiles
+        let rz = 0, rx = 0, ry = 0;
+        for (const rp of ripples) {
+          const age = (now - rp.t0) / 1000, dx = geo.gx + (c._col + .5) * geo.cw - rp.x, dy = geo.gy + (c._row + .5) * geo.ch - rp.y;
+          const d = Math.hypot(dx, dy) || 1, front = age * geo.cw * 2.6, band = (d - front) / (geo.cw * .6);
+          const a = Math.exp(-band * band) * Math.exp(-age * 2.2) * Math.exp(-((d / (geo.cw * 2.8)) ** 4));
+          rz -= a * 16; rx += dy / d * a * 9; ry -= dx / d * a * 9;
+        }
+        const lf = c._lift, bob = (lite ? 0 : Math.sin(t * .8 + c._ph) * 5 * (1 - h));
+        const tr = `translate3d(${(c._d[0] * L).toFixed(1)}px,${(c._d[1] * L).toFixed(1)}px,${(bob + lf * 46 + w * 14 + rz + c._d[2] * L * .6).toFixed(2)}px) rotateX(${(c._spin[0] * h + lf * mouse.y * 5 - w * 5 + rx).toFixed(2)}deg) rotateY(${(c._spin[1] * h + lf * mouse.x * 6 + w * 8 + ry).toFixed(2)}deg) rotateZ(${(c._spin[2] * h).toFixed(2)}deg)`;
         if (tr !== c._sig) { c._sig = tr; c.style.transform = tr; }
         if (fade !== c._o) { c._o = fade; c.style.opacity = fade; }
         const l2 = Math.round(lf * 20) / 20; if (l2 !== c._l2) { c._l2 = l2; c.style.setProperty('--lift', l2); }
@@ -1752,11 +1762,13 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
     hero.addEventListener('click', e => {
       if (!geo || hSm > .05 || e.target.closest('a,button')) return;
       const o = cellAt(e.clientX, e.clientY); if (!o) return;
-      const oi = cellEls.indexOf(o), oc = oi % 7, orow = Math.floor(oi / 7);
+      const oi = cellEls.indexOf(o), oc = oi % 7, orow = Math.floor(oi / 7), hr = hero.getBoundingClientRect();
+      ripples.push({ x: e.clientX - hr.left, y: e.clientY - hr.top, t0: performance.now() });
+      // only the tapped tile and its ring of neighbours turn over, white side up
       cellEls.forEach((c, i) => {
         if (!c._vis) return;
-        const d = Math.hypot(i % 7 - oc, Math.floor(i / 7) - orow); if (d > 7) return;
-        setTimeout(() => { c.classList.add('on'); clearTimeout(c._t); c._t = setTimeout(() => { if (c !== hov) c.classList.remove('on'); }, 560); }, d * 75);
+        const d = Math.hypot(i % 7 - oc, Math.floor(i / 7) - orow); if (d > 1.5) return;
+        setTimeout(() => { c.classList.add('on', 'rp'); clearTimeout(c._t); c._t = setTimeout(() => { if (c !== hov) c.classList.remove('on'); setTimeout(() => { if (!c.classList.contains('on')) c.classList.remove('rp'); }, 800); }, 520); }, d * 110);
       });
     });
     new IntersectionObserver(([en]) => { heroVisible = en.isIntersecting; }, { rootMargin: '60% 0px 60% 0px' }).observe(hero);
