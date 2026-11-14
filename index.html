@@ -231,6 +231,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .hero.fx .tile:hover{background:var(--neon-200)}
 .hero-dark{position:absolute;inset:0;z-index:0;background:#061217;opacity:0;pointer-events:none}
 .hero-glow{z-index:3;mix-blend-mode:soft-light}
+.hero.amb .hero-glow{opacity:var(--ga,0);transition:none}
 .dust{position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;transition:opacity .6s var(--ease)}
 body.no-dust .dust{opacity:0}
 .spark{position:fixed;inset:0;width:100%;height:100%;z-index:70;pointer-events:none}
@@ -1644,6 +1645,10 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
     const inks = $$('.hero .letter span, .hero h1, .hero .body-l, .hero .ctas .btn, .hero .scroll-cue');
     const rnd = i => { const v = Math.sin(i * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
     const GRAD = 'radial-gradient(60% 46% at 50% 10%,rgba(255,255,255,.28),rgba(255,255,255,0))', LIN = 'linear-gradient(180deg,#E0F5EE 0%,#CFF5E3 31.555%,#A6F5C7 65.364%,#5EFF88 112.7%)';
+    // touch screens have no hover, so the glass idles on its own: a soft band of light sweeps corner to corner
+    // every few seconds, lifting the tiles it passes, and now and then a single tile turns over and back.
+    const AMB = !FINE;
+    let ampNext = 0, ampPool = [];
     let parked = false, cellEls = [], geo = null, lite = false, hov = null, hSm = 0, heroVisible = true, last = performance.now(), dkNow = -1;
     const mouse = { x: 0, y: 0, on: false }, tilt = { x: 0, y: 0 };
     const vec = (cx, cy, i) => { const dx = cx / geo.hw - .5, dy = cy / geo.hh - .5, dz = .4 + (i % 3) * .25, l = Math.hypot(dx, dy, dz) || 1; return [dx / l, dy / l, dz / l]; };
@@ -1665,6 +1670,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
       cellEls.forEach((c, i) => {
         const x = gx + (i % 7) * cw, y = gy + Math.floor(i / 7) * ch;
         c._vis = y + ch > 0 && y < hh; c._d = vec(x + cw / 2, y + ch / 2, i);
+        c._col = i % 7; c._row = Math.floor(i / 7);
         c._spin = [(rnd(i) - .5) * 92, (rnd(i + 50) - .5) * 92, (rnd(i + 99) - .5) * 46]; c._ph = i * 1.37; c._lift = c._lift || 0; c._sig = '';
         const ax = x + hr.left, ay = y + hr.top;
         c.classList.toggle('plain', blockers.some(b => ax < b.right - 4 && ax + cw > b.left + 4 && ay < b.bottom - 4 && ay + ch > b.top + 4));
@@ -1673,6 +1679,10 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
         layers.push(`${GRAD} ${(-x).toFixed(1)}px ${(-y).toFixed(1)}px/${hw}px ${hh}px no-repeat`, `${LIN} ${(-x).toFixed(1)}px ${(-y).toFixed(1)}px/${hw}px ${hh}px no-repeat`);
         c.querySelector('.f').style.background = layers.join(',');
       });
+      const inView = cellEls.filter(c => c._vis && c.offsetTop + geo.gy + geo.ch < Math.min(hh, innerHeight * 1.1));
+      ampPool = inView.filter(c => !c.classList.contains('plain')); if (ampPool.length < 6) ampPool = inView;
+      geo.span = 6 + Math.ceil(Math.min(hh, innerHeight) / geo.ch);
+      hero.classList.toggle('amb', AMB);
     };
 
     const frame = now => {
@@ -1688,12 +1698,26 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
       tilt.x += ((live ? mouse.y * 5.5 : 0) - tilt.x) * k(5); tilt.y += ((live ? mouse.x * 7 : 0) - tilt.y) * k(5);
       const T = `perspective(1400px) rotateX(${tilt.x.toFixed(2)}deg) rotateY(${tilt.y.toFixed(2)}deg)`;
       cells.style.transform = T;
+      let wpos = -99, wamp = 0;
+      if (AMB && h < .3) {
+        const P = 10, u = (t % P) / P * 1.6;                 // sweep for the first ~60% of each cycle, then rest
+        if (u < 1) { wpos = -3 + u * (geo.span + 6); wamp = Math.sin(u * Math.PI) ** .5 * (1 - h / .3); }
+        const f = Math.max(0, Math.min(1, wpos / geo.span));
+        hero.style.setProperty('--mx', (f * geo.hw).toFixed(0) + 'px'); hero.style.setProperty('--my', (f * Math.min(geo.hh, innerHeight)).toFixed(0) + 'px');
+        hero.style.setProperty('--ga', (wamp * .9).toFixed(3));
+        if (h < .05 && now > ampNext && ampPool.length) {
+          const c = ampPool[Math.floor(Math.random() * ampPool.length)];
+          if (!c.classList.contains('on')) { c.classList.add('on'); clearTimeout(c._t); c._t = setTimeout(() => c.classList.remove('on'), 1700 + Math.random() * 900); }
+          ampNext = now + 1400 + Math.random() * 1600;
+        }
+      }
       const L = h * Math.max(geo.hw, geo.hh) * .9, fade = 1 - Math.max(0, Math.min(1, (h - .5) / .45));
       for (const c of cellEls) {
         if (!c._vis) continue;
         c._lift += ((c === hov && h < .05 ? 1 : 0) - c._lift) * k(7); if (c._lift < .002) c._lift = 0;
-        const lf = c._lift, bob = lite ? 0 : Math.sin(t * .8 + c._ph) * 5 * (1 - h);
-        const tr = `translate3d(${(c._d[0] * L).toFixed(1)}px,${(c._d[1] * L).toFixed(1)}px,${(bob + lf * 46 + c._d[2] * L * .6).toFixed(1)}px) rotateX(${(c._spin[0] * h + lf * mouse.y * 5).toFixed(2)}deg) rotateY(${(c._spin[1] * h + lf * mouse.x * 6).toFixed(2)}deg) rotateZ(${(c._spin[2] * h).toFixed(2)}deg)`;
+        const wd = c._col + c._row - wpos, w = wamp ? wamp * Math.exp(-wd * wd / 3.2) : 0;
+        const lf = Math.max(c._lift, w * .55), bob = (lite ? 0 : Math.sin(t * .8 + c._ph) * 5 * (1 - h));
+        const tr = `translate3d(${(c._d[0] * L).toFixed(1)}px,${(c._d[1] * L).toFixed(1)}px,${(bob + lf * 46 + c._d[2] * L * .6).toFixed(1)}px) rotateX(${(c._spin[0] * h + c._lift * mouse.y * 5 - w * 7).toFixed(2)}deg) rotateY(${(c._spin[1] * h + c._lift * mouse.x * 6 + w * 11).toFixed(2)}deg) rotateZ(${(c._spin[2] * h).toFixed(2)}deg)`;
         if (tr !== c._sig) { c._sig = tr; c.style.transform = tr; }
         if (fade !== c._o) { c._o = fade; c.style.opacity = fade; }
         const l2 = Math.round(lf * 20) / 20; if (l2 !== c._l2) { c._l2 = l2; c.style.setProperty('--lift', l2); }
