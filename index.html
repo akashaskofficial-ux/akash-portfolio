@@ -404,7 +404,8 @@ body.no-dust .dust{opacity:0}
 .about .display{color:var(--deep-500)}
 .about .body-l{color:var(--ink-60);margin:0 0 16px;max-width:56ch}
 .about .eyebrow{color:var(--grey-800)}
-.about .about-head{justify-items:start;text-align:left;margin-bottom:clamp(40px,5vw,64px)}
+.about .about-head{justify-items:start;text-align:left;margin-bottom:16px}   /* heading to intro: same 16px as How I work */
+@media (max-width:980px){.about .about-head{margin-bottom:40px}}           /* stacked: the ID card sits between them */
 .about .about-head .display{max-width:none}
 /* the About heading is two set lines; on phones it scales down just enough to keep each line on one row */
 @media (max-width:760px){.about-head .display{font-size:min(34px,calc((100vw - 40px) / 13.9))}}
