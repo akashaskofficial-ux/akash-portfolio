@@ -232,7 +232,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .hero-dark{position:absolute;inset:0;z-index:0;background:#061217;opacity:0;pointer-events:none}
 .hero-glow{z-index:3;mix-blend-mode:soft-light}
 .hero.amb .hero-glow{display:none}
-.amb-glow{position:absolute;z-index:3;left:-160px;top:-100vmax;width:320px;height:200vmax;pointer-events:none;opacity:0;will-change:transform,opacity;transform-origin:50% 50%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.16) 28%,rgba(255,255,255,.5) 50%,rgba(255,255,255,.16) 72%,rgba(255,255,255,0))}
+.amb-glow{position:absolute;z-index:3;left:-180px;top:-100vmax;width:360px;height:200vmax;pointer-events:none;opacity:0;will-change:transform,opacity;transform-origin:50% 50%}
+/* a glint, not a wash: a bright core with soft green shading either side, so it reads on the pale top as well as the green bottom */
+.amb-glow::before,.amb-glow::after{content:"";position:absolute;inset:0}
+.amb-glow::before{mix-blend-mode:multiply;background:linear-gradient(90deg,rgba(60,170,110,0),rgba(60,170,110,.22) 26%,rgba(60,170,110,0) 44%,rgba(60,170,110,0) 56%,rgba(60,170,110,.22) 74%,rgba(60,170,110,0))}
+.amb-glow::after{background:linear-gradient(90deg,rgba(255,255,255,0) 34%,rgba(255,255,255,.55) 47%,rgba(255,255,255,.85) 50%,rgba(255,255,255,.55) 53%,rgba(255,255,255,0) 66%)}
 .hero-cells i.rp .bk{background:linear-gradient(150deg,rgba(255,255,255,.5),rgba(255,255,255,.32) 55%,rgba(255,255,255,.42));border:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(255,255,255,.6);-webkit-backdrop-filter:blur(6px) saturate(1.25);backdrop-filter:blur(6px) saturate(1.25)}
 .hero-cells i.rp em{display:none}
 .dust{position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;transition:opacity .6s var(--ease)}
