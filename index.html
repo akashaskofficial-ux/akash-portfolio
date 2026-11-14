@@ -1655,6 +1655,11 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
     // touch screens have no hover, so the glass idles on its own: a soft band of light sweeps corner to corner
     // every few seconds and the tiles it passes lean towards it. A tap drops a small ripple into the glass.
     const AMB = !FINE, ripples = [];
+    // screensaver timing: the first pass starts 1.5s after load, each pass takes 6.5s, then the glass rests for 7s.
+    // Touching or scrolling holds the next pass back until the screen has been left alone for 3s.
+    const SWEEP = 6500, REST = 7000, IDLE = 3000;
+    let sweepAt = performance.now() + 1500, idleAt = 0;
+    if (AMB) ['touchstart', 'scroll'].forEach(ev => addEventListener(ev, () => { idleAt = performance.now() + IDLE; }, { passive: true }));
     let ambGlow = null;
     let parked = false, cellEls = [], geo = null, lite = false, hov = null, hSm = 0, heroVisible = true, last = performance.now(), dkNow = -1;
     const mouse = { x: 0, y: 0, on: false }, tilt = { x: 0, y: 0 };
@@ -1706,8 +1711,10 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
       cells.style.transform = T;
       let wpos = -99, wamp = 0;
       if (AMB && ambGlow) {
-        // one slow, eased pass every 14s (about 9s moving, 5s resting); only transform and opacity change
-        const P = 14, u = (t % P) / P / .64;
+        // one slow, eased pass, then a rest (see SWEEP/REST above); only transform and opacity change
+        if (now >= sweepAt && now - sweepAt < 120 && now < idleAt) sweepAt = idleAt;          // still being touched: wait
+        if (now >= sweepAt && now - sweepAt > SWEEP) sweepAt = Math.max(now + REST, idleAt);   // pass finished: schedule the next
+        const u = now >= sweepAt ? (now - sweepAt) / SWEEP : 1;
         if (u < 1 && h < .3) {
           const e = u * u * (3 - 2 * u);
           wpos = -4 + e * (geo.span + 8); wamp = Math.sin(u * Math.PI) ** 2 * (1 - h / .3);
@@ -1765,7 +1772,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
     });
     hero.addEventListener('pointerleave', () => { mouse.on = false; flipOff(hov); hov = null; });
     hero.addEventListener('click', e => {
-      if (!geo || hSm > .05 || e.target.closest('a,button')) return;
+      if (!AMB || !geo || hSm > .05 || e.target.closest('a,button')) return;     // tap ripple is for touch screens only
       const o = cellAt(e.clientX, e.clientY); if (!o) return;
       const oi = cellEls.indexOf(o), oc = oi % 7, orow = Math.floor(oi / 7), hr = hero.getBoundingClientRect();
       ripples.push({ x: e.clientX - hr.left, y: e.clientY - hr.top, t0: performance.now() });
