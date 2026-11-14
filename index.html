@@ -232,8 +232,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .hero-dark{position:absolute;inset:0;z-index:0;background:#061217;opacity:0;pointer-events:none}
 .hero-glow{z-index:3;mix-blend-mode:soft-light}
 .hero.amb .hero-glow{display:none}
-.amb-glow{position:absolute;z-index:3;left:-260px;top:-260px;width:520px;height:520px;border-radius:50%;pointer-events:none;opacity:0;mix-blend-mode:soft-light;will-change:transform,opacity;background:radial-gradient(closest-side,rgba(255,255,255,.55),rgba(255,255,255,.18) 55%,rgba(255,255,255,0))}
-.hero-cells i.rp .bk{background:#fff;color:var(--deep-500);border:0}
+.amb-glow{position:absolute;z-index:3;left:-160px;top:-100vmax;width:320px;height:200vmax;pointer-events:none;opacity:0;will-change:transform,opacity;transform-origin:50% 50%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.16) 28%,rgba(255,255,255,.5) 50%,rgba(255,255,255,.16) 72%,rgba(255,255,255,0))}
+.hero-cells i.rp .bk{background:linear-gradient(150deg,rgba(255,255,255,.5),rgba(255,255,255,.32) 55%,rgba(255,255,255,.42));border:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(255,255,255,.6);-webkit-backdrop-filter:blur(6px) saturate(1.25);backdrop-filter:blur(6px) saturate(1.25)}
 .hero-cells i.rp em{display:none}
 .dust{position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;transition:opacity .6s var(--ease)}
 body.no-dust .dust{opacity:0}
@@ -1708,16 +1708,17 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
           const e = u * u * (3 - 2 * u);
           wpos = -4 + e * (geo.span + 8); wamp = Math.sin(u * Math.PI) ** 2 * (1 - h / .3);
         }
-        const f = (wpos + 4) / (geo.span + 8), vh = Math.min(geo.hh, innerHeight);
-        ambGlow.style.transform = `translate3d(${(f * geo.hw).toFixed(1)}px,${(f * vh).toFixed(1)}px,0)`;
-        ambGlow.style.opacity = (wamp * .85).toFixed(3);
+        // the band of light sits on the same diagonal the tiles use (col + row = wpos)
+        const gxp = geo.gx + (wpos / 2 + .5) * geo.cw, gyp = geo.gy + (wpos / 2 + .5) * geo.ch;
+        ambGlow.style.transform = `translate3d(${gxp.toFixed(1)}px,${gyp.toFixed(1)}px,0) rotate(45deg)`;
+        ambGlow.style.opacity = wamp.toFixed(3);
       }
       for (let r = ripples.length - 1; r >= 0; r--) if (now - ripples[r].t0 > 1800) ripples.splice(r, 1);
       const L = h * Math.max(geo.hw, geo.hh) * .9, fade = 1 - Math.max(0, Math.min(1, (h - .5) / .45));
       for (const c of cellEls) {
         if (!c._vis) continue;
         c._lift += ((c === hov && h < .05 ? 1 : 0) - c._lift) * k(7); if (c._lift < .002) c._lift = 0;
-        const wd = c._col + c._row - wpos, w = wamp ? wamp * Math.exp(-wd * wd / 7) : 0;
+        const wd = c._col + c._row - wpos, w = wamp ? wamp * Math.exp(-wd * wd / 3.6) : 0;
         // tap ripple: a ring that runs outward from the tap, dips the glass it crosses and fades within ~3 tiles
         let rz = 0, rx = 0, ry = 0;
         for (const rp of ripples) {
@@ -1727,7 +1728,7 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
           rz -= a * 16; rx += dy / d * a * 9; ry -= dx / d * a * 9;
         }
         const lf = c._lift, bob = (lite ? 0 : Math.sin(t * .8 + c._ph) * 5 * (1 - h));
-        const tr = `translate3d(${(c._d[0] * L).toFixed(1)}px,${(c._d[1] * L).toFixed(1)}px,${(bob + lf * 46 + w * 14 + rz + c._d[2] * L * .6).toFixed(2)}px) rotateX(${(c._spin[0] * h + lf * mouse.y * 5 - w * 5 + rx).toFixed(2)}deg) rotateY(${(c._spin[1] * h + lf * mouse.x * 6 + w * 8 + ry).toFixed(2)}deg) rotateZ(${(c._spin[2] * h).toFixed(2)}deg)`;
+        const tr = `translate3d(${(c._d[0] * L).toFixed(1)}px,${(c._d[1] * L).toFixed(1)}px,${(bob + lf * 46 + w * 26 + rz + c._d[2] * L * .6).toFixed(2)}px) rotateX(${(c._spin[0] * h + lf * mouse.y * 5 - w * 9 + rx).toFixed(2)}deg) rotateY(${(c._spin[1] * h + lf * mouse.x * 6 + w * 13 + ry).toFixed(2)}deg) rotateZ(${(c._spin[2] * h).toFixed(2)}deg)`;
         if (tr !== c._sig) { c._sig = tr; c.style.transform = tr; }
         if (fade !== c._o) { c._o = fade; c.style.opacity = fade; }
         const l2 = Math.round(lf * 20) / 20; if (l2 !== c._l2) { c._l2 = l2; c.style.setProperty('--lift', l2); }
