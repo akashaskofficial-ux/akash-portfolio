@@ -1319,33 +1319,56 @@ html.intro-t .hero-copy,html.intro-t .hero .letters,html.intro-t .hero .tile,htm
   };
   if (!RM) { let q = false; addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(() => { workFx(); q = false; }); } }, { passive: true }); addEventListener('resize', () => { workGap(); workFx(); }); workGap(); workFx(); }
 
-  // card snap: a light scroll is enough to move to the next card. When scrolling settles between two cards,
-  // finish the move in the direction the person was going (or settle back if they barely moved).
+  // card snap: a light scroll is enough to move to the next card. Once scrolling has come to rest between two
+  // cards, the page glides the rest of the way in the direction the person was going (or settles back if they
+  // barely moved). The glide is a critically damped spring: it leaves from rest, speeds up gently and eases into
+  // place with no bounce, so it reads as the page settling rather than being pulled.
   if (!RM) {
-    let lastY = scrollY, dir = 0, idle = 0, snapping = false, snapT = 0;
+    let lastY = scrollY, lastT = performance.now(), vel = 0, peak = 0, dir = 0, idle = 0, snapping = false, raf = 0, touching = false;
+    const W = 7.5;                                            // spring stiffness (rad/s): ~0.8s to settle
     const span = () => { const top = stage.getBoundingClientRect().top + scrollY; return { top, len: stage.offsetHeight - innerHeight }; };
-    const snap = () => {
-      if (snapping || $('#nav').classList.contains('menu-open')) return;
+    const setY = y => { if (window.__lenis) window.__lenis.scrollTo(y, { immediate: true, force: true }); else scrollTo(0, y); };
+    const stop = () => { if (!snapping) return; cancelAnimationFrame(raf); snapping = false; lastY = scrollY; };
+    const glide = (target, v0) => {
+      let x0 = 0, t0 = 0; snapping = true;
+      const tick = now => {
+        if (!t0) {                                                  // start from wherever the page is on the first frame
+          t0 = now; x0 = scrollY - target;
+          if (Math.sign(v0) === Math.sign(x0)) v0 = 0;             // only carry speed that is already heading to the card
+        }
+        const t = (now - t0) / 1000, e = Math.exp(-W * t), x = (x0 + (v0 + W * x0) * t) * e;   // critically damped, starts at the current speed
+        if (Math.abs(x) < .5) { setY(target); snapping = false; lastY = scrollY; return; }
+        setY(target + x); raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    };
+    const snap = (v0 = 0) => {
+      if (snapping || touching || $('#nav').classList.contains('menu-open') || (window.__lenis && window.__lenis.isStopped)) return;
       const { top, len } = span(); if (len <= 0) return;
       const total = NW - 1 + TAIL, T = (scrollY - top) / len * total;
       if (T <= .02 || T >= NW - 1 - .02) return;             // before the first card or past the last one: scroll freely
       const base = Math.floor(T), f = T - base;
-      const to = f < .04 ? base : f > .96 ? base + 1 : dir > 0 ? base + 1 : dir < 0 ? base : Math.round(T);
+      const to = f < .05 ? base : f > .95 ? base + 1 : dir > 0 ? base + 1 : dir < 0 ? base : Math.round(T);
       const y = Math.round(top + to / total * len);
-      if (Math.abs(y - scrollY) < 2) return;
-      // a new wheel or touch can interrupt the glide, so the lock is released by a timer, never by the animation alone
-      snapping = true; clearTimeout(snapT); snapT = setTimeout(() => { snapping = false; lastY = scrollY; }, 800);
-      if (window.__lenis && !window.__lenis.isStopped) window.__lenis.scrollTo(y, { duration: .75, easing: t => 1 - Math.pow(1 - t, 3) });
-      else scrollTo({ top: y, behavior: 'smooth' });
+      if (Math.abs(y - scrollY) >= 2) glide(y, v0);
     };
-    let touching = false;
     addEventListener('scroll', () => {
-      const y = scrollY; if (Math.abs(y - lastY) > .5) dir = Math.sign(y - lastY); lastY = y;
-      clearTimeout(idle); if (!snapping && !touching) idle = setTimeout(snap, 140);
+      if (snapping) return;
+      const y = scrollY, now = performance.now(), dt = Math.max(1, now - lastT);
+      if (Math.abs(y - lastY) > .5) dir = Math.sign(y - lastY);
+      if (dt > 120) { vel = 0; peak = 0; }                          // a fresh gesture: forget the last one's speed
+      vel = vel * .5 + (y - lastY) / dt * 1000 * .5; lastY = y; lastT = now; peak = Math.max(peak, Math.abs(vel));
+      clearTimeout(idle);
+      if (touching) return;
+      // wheel and trackpad (smooth-scrolled): take over as the scroll slows down, keeping its speed, so there is no
+      // dead pause before the glide. Touch: wait for the native momentum to finish, since it cannot be taken over.
+      if (window.__lenis && !window.__lenis.isTouching && matchMedia('(pointer: fine)').matches && peak > 150 && Math.abs(vel) < peak * .5) { peak = 0; snap(vel); return; }
+      idle = setTimeout(() => snap(0), 120);
     }, { passive: true });
-    addEventListener('touchstart', () => { touching = true; clearTimeout(idle); }, { passive: true });
-    addEventListener('wheel', () => { if (snapping) { snapping = false; clearTimeout(snapT); } }, { passive: true });
-    addEventListener('touchend', () => { touching = false; clearTimeout(idle); idle = setTimeout(snap, 160); }, { passive: true });
+    addEventListener('wheel', stop, { passive: true });
+    addEventListener('touchstart', () => { touching = true; clearTimeout(idle); stop(); }, { passive: true });
+    addEventListener('touchend', () => { touching = false; clearTimeout(idle); idle = setTimeout(() => snap(0), 140); }, { passive: true });
+    addEventListener('keydown', stop);
   }
 
 
