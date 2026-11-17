@@ -873,8 +873,8 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
   </div>
   <div class="hero-copy">
     <div class="rot" aria-live="off">
-      <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">UX Engineer, UI Designer, Design System Architect, Product Designer</span>
-      <div class="rot-list" aria-hidden="true"><ul id="roles"><li>UX Engineer</li><li>UI Designer</li><li>Design System Architect</li><li>Product Designer</li><li>UX Engineer</li></ul></div>
+      <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Product Designer, UX Engineer</span>
+      <div class="rot-list" aria-hidden="true"><ul id="roles"><li>Product Designer</li><li>UX Engineer</li><li>Product Designer</li></ul></div>
     </div>
     <h1 class="split">Crafting clarity out of complexity.</h1>
     <p class="body-l">I design for the person using it at 2am under pressure, not the person in the demo.</p>
@@ -1228,14 +1228,14 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
   const tick = () => { const t = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }).format(new Date()); const c2 = $('#clock2'); if (c2) c2.textContent = t + ' IST'; };
   tick(); setInterval(tick, 30000);
 
-  // role rotator: UX Engineer longest, then loop
+  // role rotator: alternates the roles; the last <li> repeats the first so the loop is seamless
   const roles = $('#roles');
   if (!RM) {
-    const dwell = [2400, 1600, 1600, 1600]; let i = 0;
+    const N = roles.children.length - 1, dwell = [2400, 2400]; let i = 0;
     const step = () => {
       i++; roles.style.transition = 'transform .6s cubic-bezier(.23,1,.32,1)'; roles.style.transform = `translateY(${-1.1 * i}em)`;
-      if (i === 4) setTimeout(() => { roles.style.transition = 'none'; roles.style.transform = 'translateY(0)'; i = 0; }, 650);
-      setTimeout(step, dwell[i % 4] + (i === 4 ? 650 : 0));
+      if (i === N) setTimeout(() => { roles.style.transition = 'none'; roles.style.transform = 'translateY(0)'; i = 0; }, 650);
+      setTimeout(step, dwell[i % N] + (i === N ? 650 : 0));
     };
     setTimeout(step, dwell[0]);
   }
