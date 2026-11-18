@@ -266,6 +266,9 @@ body.no-dust .dust{opacity:0}
 .works-intro .works-head{margin:0}
 .works-stage{position:relative;height:calc((var(--n,4) - 1 + .6) * 60vh + 100vh)}
 .works-sticky{position:sticky;z-index:41;top:0;height:100vh;height:100svh;overflow:hidden}
+/* touch: native snap points for each card rest (placed by script); snapping is only switched on inside the stage */
+.wsnap{position:absolute;left:0;width:1px;height:1px;pointer-events:none;scroll-snap-align:start;scroll-snap-stop:always}
+html.snap-works{scroll-snap-type:y mandatory}
 .work-list{position:absolute;inset:0;z-index:1;perspective:1800px}
 .work-list .work-card{position:absolute;left:50%;top:50%;width:min(1080px,74vw,calc((100svh - 190px) * 1176 / 633));margin:0;
   transform:translate(-50%,-50%) translate3d(var(--x,0px),var(--y,0px),0) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(var(--s,1));opacity:var(--o,1);transform-origin:50% 50%}
@@ -1385,7 +1388,32 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
   // cards, the page glides the rest of the way in the direction the person was going (or settles back if they
   // barely moved). The glide is a critically damped spring: it leaves from rest, speeds up gently and eases into
   // place with no bounce, so it reads as the page settling rather than being pulled.
-  if (!RM) {
+  // Touch screens use the browser's own scroll snapping instead (below): JS cannot take over iOS momentum, so a JS
+  // glide could only start after the momentum died, which read as a stall and then a second, separate move.
+  const NATIVE_SNAP = !matchMedia('(pointer: fine)').matches;
+  if (!RM && NATIVE_SNAP) {
+    // one snap point per card rest, plus one where the next section reaches the top, so a swipe from the last card
+    // still leaves the section. Snapping is switched on only while the page is inside the stage, so the rest of the
+    // page scrolls freely. scroll-snap-stop makes one swipe move exactly one card, however hard it is.
+    const marks = Array.from({ length: NW + 1 }, (_, k) => {
+      const m = document.createElement('i'); m.className = 'wsnap'; m.setAttribute('aria-hidden', 'true'); stage.appendChild(m); return m;
+    });
+    let on = false, y0 = 0, y1 = 0;
+    const place = () => {
+      const len = stage.offsetHeight - innerHeight, total = NW - 1 + TAIL;
+      marks.forEach((m, k) => { m.style.top = (k < NW ? Math.round(k / total * len) : stage.offsetHeight) + 'px'; });
+      const top = stage.getBoundingClientRect().top + scrollY; y0 = top; y1 = top + stage.offsetHeight;
+    };
+    const toggle = () => {
+      const want = scrollY >= y0 - 2 && scrollY <= y1 + 2 && !$('#nav').classList.contains('menu-open');
+      if (want !== on) { on = want; document.documentElement.classList.toggle('snap-works', on); }
+    };
+    place(); toggle();
+    addEventListener('scroll', toggle, { passive: true });
+    addEventListener('resize', () => { place(); toggle(); });
+    addEventListener('load', () => { place(); toggle(); });
+  }
+  if (!RM && !NATIVE_SNAP) {
     let lastY = scrollY, lastT = performance.now(), vel = 0, peak = 0, dir = 0, idle = 0, snapping = false, raf = 0, touching = false;
     const W = 7.5;                                            // spring stiffness (rad/s): ~0.8s to settle
     const span = () => { const top = stage.getBoundingClientRect().top + scrollY; return { top, len: stage.offsetHeight - innerHeight }; };
