@@ -1317,19 +1317,43 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
 
   // works: pinned stage. Card 1 starts centred; scrolling moves the current card off to the top-right
   // while the next rises from the bottom-left corner. Cards are small in the corners, full size in the centre.
-  const stage = $('.works-stage'), wcards = $$('.work-card');
+  const stage = $('.works-stage'), wcards = $$('.work-card'), wsticky = $('.works-sticky'), wintro = $('.works-intro');
   const NW = wcards.length, HOLD = .06, TAIL = .6;          // HOLD: share of each step spent resting at the centre (each step is 60vh of scroll)
   const step = x => { const f = Math.min(1, Math.max(0, (x - HOLD) / (1 - 2 * HOLD))); return f * f * (3 - 2 * f); };
+  const tPos = t => { const T = t * (NW - 1 + TAIL), Ti = Math.floor(T); return Math.min(NW - 1, Ti + step(T - Ti)); };   // rests at each whole number; last card stays centred
+  const pose = (u, vw, vh) => { const a = Math.abs(u);       // u: -1 bottom-left, 0 centre, +1 top-right
+    return `translate(-50%,-50%) translate3d(${(u * vw * .6).toFixed(1)}px,${(-u * vh * .62).toFixed(1)}px,0) rotateX(${(u * 10).toFixed(2)}deg) rotateY(${(-u * 16).toFixed(2)}deg) scale(${Math.max(.36, 1 - .6 * a).toFixed(3)})`; };
+  // touch screens: the card motion runs on the browser's scroll-driven animation engine (compositor), so it moves in
+  // lockstep with the finger and momentum instead of trailing a frame behind a scroll listener. Desktop keeps the JS path.
+  const SDA = !matchMedia('(pointer: fine)').matches && typeof ViewTimeline !== 'undefined';
+  let anims = [], animW = 0;
+  const buildAnims = () => {
+    const vw = innerWidth, vh = wsticky.clientHeight; animW = vw;
+    anims.forEach(a => a.cancel()); anims = [];
+    const tl = new ViewTimeline({ subject: stage, axis: 'block' }), N = 160;
+    wcards.forEach((c, i) => {
+      const card = [], img = [];
+      for (let k = 0; k <= N; k++) {
+        const t = k / N, u = tPos(t) - i, hide = Math.abs(u) > 1.4;
+        card.push({ offset: t, transform: pose(Math.max(-1.6, Math.min(1.6, u)), vw, vh), visibility: hide ? 'hidden' : 'visible' });
+        img.push({ offset: t, transform: `translate3d(0,${(u * -40).toFixed(1)}px,0)` });
+      }
+      const opt = { timeline: tl, rangeStart: 'contain 0%', rangeEnd: 'contain 100%', fill: 'both', easing: 'linear' };
+      anims.push(c.animate(card, opt));
+      const im = c.querySelector('.panel img'); if (im) { im.style.transition = 'none'; anims.push(im.animate(img, opt)); }
+    });
+  };
   const workFx = () => {
     const vw = innerWidth, vh = innerHeight;
     const r = stage.getBoundingClientRect();
-    const t = Math.max(0, Math.min(1, -r.top / (r.height - vh)));
-    const T = t * (NW - 1 + TAIL);                          // 0 .. NW-1+TAIL
-    const Ti = Math.floor(T), Tp = Math.min(NW - 1, Ti + step(T - Ti));   // rests at each whole number; last card stays centred
+    const Tp = tPos(Math.max(0, Math.min(1, -r.top / (r.height - vh))));
     wcards.forEach((c, i) => {
-      const u = Tp - i;                                     // -1 bottom-left, 0 centre, +1 top-right
-      const a = Math.abs(u);
-      if (a > 1.4) { c.style.visibility = 'hidden'; c.tabIndex = -1; return; }
+      const u = Tp - i, a = Math.abs(u);
+      c.style.zIndex = String(100 - Math.round(a * 50));
+      c.style.pointerEvents = a < .3 ? 'auto' : 'none';
+      c.tabIndex = a < .5 ? 0 : -1;
+      if (SDA) return;                                      // visuals come from the scroll-driven animations
+      if (a > 1.4) { c.style.visibility = 'hidden'; return; }
       c.style.visibility = 'visible';
       c.style.setProperty('--x', (u * vw * .6).toFixed(1) + 'px');
       c.style.setProperty('--y', (-u * vh * .62).toFixed(1) + 'px');
@@ -1337,21 +1361,25 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
       c.style.setProperty('--ry', (-u * 16).toFixed(2) + 'deg');
       c.style.setProperty('--rx', (u * 10).toFixed(2) + 'deg');
       c.style.setProperty('--iy', (u * -40).toFixed(1) + 'px');
-      c.style.zIndex = String(100 - Math.round(a * 50));
-      c.style.pointerEvents = a < .3 ? 'auto' : 'none';
-      c.tabIndex = a < .5 ? 0 : -1;
     });
   };
   // card 1 sits centred in a full-height stage, which leaves a tall gap under the heading. Pull the stage up
   // so the heading-to-card gap stays near 64px (48px on phones) at any viewport height.
-  const wsticky = $('.works-sticky'), wintro = $('.works-intro');
   const workGap = () => {
     const want = innerWidth < 760 ? 48 : 64;
     const pad = parseFloat(getComputedStyle(wintro).paddingBottom) || 0;
     const free = (wsticky.clientHeight - wcards[0].offsetHeight) / 2;
     stage.style.marginTop = Math.min(0, Math.round(want - pad - free)) + 'px';
   };
-  if (!RM) { let q = false; addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(() => { workFx(); q = false; }); } }, { passive: true }); addEventListener('resize', () => { workGap(); workFx(); }); workGap(); workFx(); }
+  if (!RM) {
+    let q = false, lastW = innerWidth;
+    addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(() => { workFx(); q = false; }); } }, { passive: true });
+    addEventListener('resize', () => {
+      if (SDA && innerWidth === lastW) return;              // address bar moved: nothing to re-lay
+      lastW = innerWidth; workGap(); if (SDA) buildAnims(); workFx();
+    });
+    workGap(); if (SDA) buildAnims(); workFx();
+  }
 
   // card snap: a light scroll is enough to move to the next card. Once scrolling has come to rest between two
   // cards, the page glides the rest of the way in the direction the person was going (or settles back if they
