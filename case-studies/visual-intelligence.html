@@ -459,15 +459,18 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
    the bottom of the screen, so the resume is always one tap away. Desktop is untouched. */
 @media (max-width:899px){
   .nav-actions{position:fixed;justify-self:stretch;left:max(12px, env(safe-area-inset-left,0px));right:max(12px, env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));
-    max-width:520px;margin:0 auto;display:flex;gap:8px;padding:6px 6px 10px;border-radius:20px;background:rgba(9,22,25,.84);border:1px solid rgba(200,255,217,.14);
-    -webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);box-shadow:0 12px 32px rgba(3,12,14,.28)}
+    max-width:520px;margin:0 auto;display:flex;gap:8px;padding:6px 6px 10px;border-radius:24px;
+    background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,255,255,.08)),rgba(120,160,145,.12);border:1px solid rgba(255,255,255,.4);
+    -webkit-backdrop-filter:blur(22px) saturate(1.8);backdrop-filter:blur(22px) saturate(1.8);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.6),inset 0 -1px 0 rgba(255,255,255,.1),0 10px 30px rgba(3,12,14,.2)}
   .nav .nav-actions .btn.dl{display:inline-flex;flex:1;justify-content:space-between;height:50px;padding:0 5px 0 18px;border-radius:14px;font-size:14px}
   .nav .nav-actions .btn.dl .pill,.nav .nav-actions .btn.dl .lbl{display:block}
   .nav .nav-actions .btn.dl .chip{width:40px;height:40px;border-radius:10px}
   .nav-actions .mtog{width:50px;height:50px;border-radius:14px}
   .mm-foot .mm-cv{display:none}
-  .mmenu{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+  .mmenu{padding-bottom:calc(100px + env(safe-area-inset-bottom,0px));clip-path:inset(100% 0 0 0 round 28px 28px 0 0)}
   .ktoast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+  .hero .ctas{display:none}
   .hero .scroll-cue{bottom:calc(100px + env(safe-area-inset-bottom,0px))}
   .footer{padding-bottom:calc(108px + env(safe-area-inset-bottom,0px))}
 }
