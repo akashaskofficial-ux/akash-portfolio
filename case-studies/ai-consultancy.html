@@ -541,6 +541,7 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
   .nx-card:focus-visible .nx-btn{display:inline-flex}
 }
 @media (prefers-reduced-motion:reduce){.vw-cur{transition:opacity .15s}}
+.spark{position:fixed;inset:0;width:100%;height:100%;z-index:70;pointer-events:none}
 </style>
 <style>
 .ai-cover img{display:block;width:100%;height:auto}
@@ -1051,6 +1052,111 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
   addEventListener('scroll', queue, { passive: true });
   document.documentElement.addEventListener('pointerleave', () => cur.classList.remove('on'));
   addEventListener('pageshow', () => cur.classList.remove('on'));
+})();
+</script>
+<script>
+/* cursor sparkle (same effect as the home page) */
+(() => {
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches, FINE = matchMedia('(pointer: fine)').matches;
+  // cursor sparkle: wakes only while the mouse moves. A short light trail follows the pointer, sparks flick off
+  // behind it and slow down, and now and then a pixel bit or a four-point twinkle pops, snapped to a 4px grid like
+  // the rest of the pixel motifs. Greens throughout: bright and additive on dark bands, deeper ink on mint ones.
+  if (!RM && FINE) {
+    const cv = document.createElement('canvas'); cv.className = 'spark'; cv.setAttribute('aria-hidden', 'true'); document.body.appendChild(cv);
+    const ctx = cv.getContext('2d'); let dpr = 1;
+    const fit = () => { dpr = Math.min(devicePixelRatio || 1, 2); cv.width = Math.round(innerWidth * dpr); cv.height = Math.round(innerHeight * dpr); };
+    fit(); addEventListener('resize', fit);
+    const PAL = {                                   // [trail outer, trail core, spark, hot spark, glow]
+      dark: ['94,255,136', '231,255,237', '152,254,184', '231,255,237', '94,255,136'],
+      mint: ['42,155,92', '17,37,41', '42,155,92', '21,77,50', '94,255,136']
+    };
+    const NS = 90, NB = 26;
+    const sparks = Array.from({ length: NS }, () => ({ life: 0 })), bits = Array.from({ length: NB }, () => ({ life: 0 }));
+    let si = 0, bi = 0, trail = [], px = -1e4, py = -1e4, x = 0, y = 0, energy = 0, glow = 0, raf = 0, running = false, last = 0, tone = 'dark';
+    // tone from the real background under the pointer: dark surfaces get the bright additive look, light ones the deeper ink
+    const bgCache = new WeakMap();
+    const lumOf = el => {
+      for (let e = el; e && e.nodeType === 1; e = e.parentElement) {
+        if (bgCache.has(e)) return bgCache.get(e);
+        const m = getComputedStyle(e).backgroundColor.match(/[\d.]+/g);
+        if (m && (m[3] === undefined || +m[3] > .5)) { const l = (.2126 * m[0] + .7152 * m[1] + .0722 * m[2]) / 255; bgCache.set(e, l); return l; }
+      }
+      return 1;
+    };
+    const toneAt = (yy, xx) => lumOf(document.elementFromPoint(xx, yy)) < .45 ? 'dark' : 'mint';
+    const spawnSpark = (sx, sy, dx, dy, e) => {
+      const o = sparks[si]; si = (si + 1) % NS;
+      const a = Math.atan2(dy, dx) + Math.PI + (Math.random() - .5) * 2.4, v = .03 + Math.random() * .1 * (.5 + e);
+      o.x = sx; o.y = sy; o.vx = Math.cos(a) * v + dx * .004; o.vy = Math.sin(a) * v + dy * .004 - .01;
+      o.max = o.life = 220 + Math.random() * 300; o.w = .8 + Math.random() * 1.2; o.hot = Math.random() < .16; o.tone = tone;
+    };
+    const spawnBit = (sx, sy, e) => {
+      const o = bits[bi]; bi = (bi + 1) % NB; const r = 10 + Math.random() * 26 * (.6 + e);
+      const a = Math.random() * Math.PI * 2;
+      o.x = Math.round((sx + Math.cos(a) * r) / 4) * 4; o.y = Math.round((sy + Math.sin(a) * r) / 4) * 4;
+      o.star = Math.random() < .35; o.s = o.star ? 5 + Math.random() * 5 : 4 * (1 + (Math.random() < .3));
+      o.max = o.life = o.star ? 420 + Math.random() * 260 : 300 + Math.random() * 300; o.tone = tone;
+    };
+    const star = (cx, cy, r) => {   // four-point twinkle: two thin diamonds
+      ctx.beginPath(); ctx.moveTo(cx, cy - r); ctx.lineTo(cx + r * .16, cy - r * .16); ctx.lineTo(cx + r, cy); ctx.lineTo(cx + r * .16, cy + r * .16);
+      ctx.lineTo(cx, cy + r); ctx.lineTo(cx - r * .16, cy + r * .16); ctx.lineTo(cx - r, cy); ctx.lineTo(cx - r * .16, cy - r * .16); ctx.closePath(); ctx.fill();
+    };
+    addEventListener('pointermove', ev => {
+      if (ev.pointerType !== 'mouse') return;
+      x = ev.clientX; y = ev.clientY; if (px < -9e3) { px = x; py = y; }
+      const dx = x - px, dy = y - py, d = Math.hypot(dx, dy), now = performance.now();
+      tone = toneAt(y, x); energy = Math.min(1, energy * .6 + d / 60);
+      trail.push({ x, y, t: now, tone }); if (trail.length > 24) trail.shift();
+      const n = Math.min(4, Math.floor(d / 12) + (Math.random() < .3 ? 1 : 0));
+      for (let k = 0; k < n; k++) { const f = Math.random(); spawnSpark(px + dx * f, py + dy * f, dx, dy, energy); }
+      if (Math.random() < .06 + energy * .2) spawnBit(x, y, energy);
+      glow = Math.min(1, glow + d / 140); px = x; py = y;
+      if (!running) { running = true; last = now; raf = requestAnimationFrame(draw); }
+    }, { passive: true });
+    document.addEventListener('pointerleave', () => { px = -1e4; });
+    const mode = t => { ctx.globalCompositeOperation = t === 'mint' ? 'source-over' : 'lighter'; };
+    const draw = () => {
+      const now = performance.now(), dt = Math.max(0, Math.min(48, now - last)); last = now; let alive = false;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, innerWidth, innerHeight);
+      // soft light under the cursor
+      glow *= Math.pow(.992, dt);
+      if (glow > .02) {
+        alive = true; mode('dark');
+        const g = ctx.createRadialGradient(x, y, 0, x, y, 64), a = (tone === 'mint' ? .1 : .12) * glow;
+        g.addColorStop(0, `rgba(${PAL[tone][4]},${a.toFixed(3)})`); g.addColorStop(1, `rgba(${PAL[tone][4]},0)`);
+        ctx.fillStyle = g; ctx.fillRect(x - 64, y - 64, 128, 128);
+      }
+      // trail: the last ~200ms of the pointer path, tapering
+      while (trail.length && now - trail[0].t > 200) trail.shift();
+      if (trail.length > 1) {
+        alive = true; ctx.lineCap = 'round';
+        for (let k = 1; k < trail.length; k++) {
+          const q = trail[k], f = Math.min(1, Math.max(0, 1 - (now - q.t) / 200)), P = PAL[q.tone]; mode(q.tone);
+          ctx.beginPath(); ctx.moveTo(trail[k - 1].x, trail[k - 1].y); ctx.lineTo(q.x, q.y);
+          ctx.strokeStyle = `rgba(${P[0]},${(f * (q.tone === 'mint' ? .4 : .55)).toFixed(3)})`; ctx.lineWidth = 2.4 * f; ctx.stroke();
+          ctx.strokeStyle = `rgba(${P[1]},${(f * (q.tone === 'mint' ? .5 : .6)).toFixed(3)})`; ctx.lineWidth = .9 * f; ctx.stroke();
+        }
+      }
+      // sparks: short streaks that drift back and slow down
+      for (const o of sparks) {
+        if (o.life <= 0) continue; o.life -= dt; alive = true;
+        const f = Math.max(0, o.life / o.max), ox = o.x, oy = o.y, P = PAL[o.tone];
+        o.x += o.vx * dt; o.y += o.vy * dt; o.vx *= .985; o.vy = o.vy * .985 + .0004 * dt;
+        mode(o.tone); ctx.strokeStyle = `rgba(${o.hot ? P[3] : P[2]},${(f * .9).toFixed(3)})`; ctx.lineWidth = o.w * f;
+        ctx.beginPath(); ctx.moveTo(ox - o.vx * 10, oy - o.vy * 10); ctx.lineTo(o.x, o.y); ctx.stroke();
+      }
+      // pixel bits and twinkles: pop in, hold, fade; twinkles spin a little
+      for (const o of bits) {
+        if (o.life <= 0) continue; o.life -= dt; alive = true;
+        const u = 1 - o.life / o.max, a = u < .15 ? u / .15 : 1 - (u - .15) / .85, P = PAL[o.tone]; mode(o.tone);
+        ctx.fillStyle = `rgba(${o.star ? P[o.tone === 'mint' ? 3 : 1] : P[2]},${(Math.max(0, a) * (o.star ? .9 : .7)).toFixed(3)})`;
+        if (o.star) { ctx.save(); ctx.translate(o.x, o.y); ctx.rotate(u * .9); star(0, 0, o.s * (.6 + .4 * Math.sin(Math.PI * Math.min(1, u * 1.4)))); ctx.restore(); }
+        else ctx.fillRect(o.x - o.s / 2, o.y - o.s / 2, o.s, o.s);
+      }
+      energy *= Math.pow(.95, dt / 16);
+      if (alive) raf = requestAnimationFrame(draw); else { running = false; ctx.clearRect(0, 0, innerWidth, innerHeight); }
+    };
+  }
 })();
 </script>
 </body>
