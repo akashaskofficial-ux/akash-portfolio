@@ -1200,7 +1200,11 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
   if (!RM && window.Lenis) {
     lenis = new Lenis({ duration: 1.1, easing: t => 1 - Math.pow(1 - t, 4) }); window.__lenis = lenis;
     const raf = t => { lenis.raf(t); requestAnimationFrame(raf); }; requestAnimationFrame(raf);
-    $$('a[href^="#"]').forEach(a => a.addEventListener('click', e => { const id = a.getAttribute('href'); const el = id.length > 1 && document.querySelector(id); if (el) { e.preventDefault(); lenis.scrollTo(el, { offset: id === '#top' ? 0 : -24 }); } }));
+    $$('a[href^="#"]').forEach(a => a.addEventListener('click', e => { const id = a.getAttribute('href'); const el = id.length > 1 && document.querySelector(id); if (el) { e.preventDefault();
+      // touch: card snapping is paused for the whole jump, otherwise iOS snaps to a card on every frame the glide
+      // spends inside the work stage, which flickers and can stop the jump part way
+      const done = window.__snapPause ? window.__snapPause() : () => {};
+      lenis.scrollTo(el, { offset: id === '#top' ? 0 : -24, onComplete: done }); } }));
   }
 
   // hero cells
@@ -1422,15 +1426,21 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
     const marks = Array.from({ length: NW + 1 }, (_, k) => {
       const m = document.createElement('i'); m.className = 'wsnap'; m.setAttribute('aria-hidden', 'true'); stage.appendChild(m); return m;
     });
-    let on = false, y0 = 0, y1 = 0;
+    let on = false, y0 = 0, y1 = 0, paused = false, pauseT = 0;
     const place = () => {
       const len = stage.offsetHeight - innerHeight, total = NW - 1 + TAIL;
       marks.forEach((m, k) => { m.style.top = (k < NW ? Math.round(k / total * len) : stage.offsetHeight) + 'px'; });
       const top = stage.getBoundingClientRect().top + scrollY; y0 = top; y1 = top + stage.offsetHeight;
     };
     const toggle = () => {
-      const want = scrollY >= y0 - 2 && scrollY <= y1 + 2 && !$('#nav').classList.contains('menu-open');
+      const want = !paused && scrollY >= y0 - 2 && scrollY <= y1 + 2 && !$('#nav').classList.contains('menu-open');
       if (want !== on) { on = want; document.documentElement.classList.toggle('snap-works', on); }
+    };
+    window.__snapPause = () => {
+      paused = true; toggle(); clearTimeout(pauseT);
+      const end = () => { clearTimeout(pauseT); if (paused) { paused = false; toggle(); } };
+      pauseT = setTimeout(end, 2500);   // safety net in case the glide is interrupted and never completes
+      return end;
     };
     place(); toggle();
     addEventListener('scroll', toggle, { passive: true });
