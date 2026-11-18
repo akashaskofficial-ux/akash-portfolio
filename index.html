@@ -1326,14 +1326,16 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
   const tPos = t => { const T = t * (NW - 1 + TAIL), Ti = Math.floor(T); return Math.min(NW - 1, Ti + step(T - Ti)); };   // rests at each whole number; last card stays centred
   const pose = (u, vw, vh) => { const a = Math.abs(u);       // u: -1 bottom-left, 0 centre, +1 top-right
     return `translate(-50%,-50%) translate3d(${(u * vw * .6).toFixed(1)}px,${(-u * vh * .62).toFixed(1)}px,0) rotateX(${(u * 10).toFixed(2)}deg) rotateY(${(-u * 16).toFixed(2)}deg) scale(${Math.max(.36, 1 - .6 * a).toFixed(3)})`; };
-  // touch screens: the card motion runs on the browser's scroll-driven animation engine (compositor), so it moves in
-  // lockstep with the finger and momentum instead of trailing a frame behind a scroll listener. Desktop keeps the JS path.
-  const SDA = !matchMedia('(pointer: fine)').matches && typeof ViewTimeline !== 'undefined';
+  // touch screens: the native snap moves the page a whole card in ~0.4s, which is too quick to read. So the cards do
+  // not follow the scroll directly: they follow it through a soft, critically damped spring and glide into place over
+  // about a second, never overshooting. The motion is prebuilt as paused animations (transform only, so the
+  // compositor draws it) and the spring just sets their time each frame. Desktop keeps the JS path.
+  const SDA = !matchMedia('(pointer: fine)').matches && typeof Element.prototype.animate === 'function';
   let anims = [], animW = 0;
   const buildAnims = () => {
     const vw = innerWidth, vh = wsticky.clientHeight; animW = vw;
     anims.forEach(a => a.cancel()); anims = [];
-    const tl = new ViewTimeline({ subject: stage, axis: 'block' }), N = 160;
+    const N = 160;
     wcards.forEach((c, i) => {
       const card = [], img = [];
       for (let k = 0; k <= N; k++) {
@@ -1341,21 +1343,40 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
         card.push({ offset: t, transform: pose(Math.max(-1.6, Math.min(1.6, u)), vw, vh), visibility: hide ? 'hidden' : 'visible' });
         img.push({ offset: t, transform: `translate3d(0,${(u * -40).toFixed(1)}px,0)` });
       }
-      const opt = { timeline: tl, rangeStart: 'contain 0%', rangeEnd: 'contain 100%', fill: 'both', easing: 'linear' };
+      const opt = { duration: 1000, fill: 'both', easing: 'linear' };
       anims.push(c.animate(card, opt));
       const im = c.querySelector('.panel img'); if (im) { im.style.transition = 'none'; anims.push(im.animate(img, opt)); }
     });
+    anims.forEach(a => { a.pause(); a.currentTime = cur * 1000; });
   };
+  // the spring: cur chases the scroll's progress through the stage
+  const SPRING = 4;                                         // rad/s: a card change takes ~1.2s to settle
+  let cur = 0, vel = 0, sprRaf = 0, sprLast = 0;
+  const target = () => { const r = stage.getBoundingClientRect(), len = r.height - innerHeight; return len > 0 ? Math.max(0, Math.min(1, -r.top / len)) : 0; };
+  const paint = () => {
+    anims.forEach(a => { a.currentTime = cur * 1000; });
+    const Tp = tPos(cur);
+    wcards.forEach((c, i) => { const a = Math.abs(Tp - i); c.style.zIndex = String(100 - Math.round(a * 50)); c.style.pointerEvents = a < .3 ? 'auto' : 'none'; c.tabIndex = a < .5 ? 0 : -1; });
+  };
+  const sprTick = now => {
+    const dt = Math.min(.05, (now - sprLast) / 1000); sprLast = now;
+    const x = target() - cur;
+    vel += (SPRING * SPRING * x - 2 * SPRING * vel) * dt; cur += vel * dt;
+    if (Math.abs(x) < 1e-4 && Math.abs(vel) < 1e-3) { cur = target(); vel = 0; paint(); sprRaf = 0; return; }
+    paint(); sprRaf = requestAnimationFrame(sprTick);
+  };
+  const wake = () => { if (!sprRaf) { sprLast = performance.now(); sprRaf = requestAnimationFrame(sprTick); } };
+  const jump = () => { cur = target(); vel = 0; paint(); };
   const workFx = () => {
     const vw = innerWidth, vh = innerHeight;
     const r = stage.getBoundingClientRect();
     const Tp = tPos(Math.max(0, Math.min(1, -r.top / (r.height - vh))));
+    if (SDA) { wake(); return; }                            // touch: the spring follows the scroll
     wcards.forEach((c, i) => {
       const u = Tp - i, a = Math.abs(u);
       c.style.zIndex = String(100 - Math.round(a * 50));
       c.style.pointerEvents = a < .3 ? 'auto' : 'none';
       c.tabIndex = a < .5 ? 0 : -1;
-      if (SDA) return;                                      // visuals come from the scroll-driven animations
       if (a > 1.4) { c.style.visibility = 'hidden'; return; }
       c.style.visibility = 'visible';
       c.style.setProperty('--x', (u * vw * .6).toFixed(1) + 'px');
@@ -1379,9 +1400,9 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
     addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(() => { workFx(); q = false; }); } }, { passive: true });
     addEventListener('resize', () => {
       if (SDA && innerWidth === lastW) return;              // address bar moved: nothing to re-lay
-      lastW = innerWidth; workGap(); if (SDA) buildAnims(); workFx();
+      lastW = innerWidth; workGap(); if (SDA) { buildAnims(); jump(); } workFx();
     });
-    workGap(); if (SDA) buildAnims(); workFx();
+    workGap(); if (SDA) { buildAnims(); jump(); } workFx();
   }
 
   // card snap: a light scroll is enough to move to the next card. Once scrolling has come to rest between two
