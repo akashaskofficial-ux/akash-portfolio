@@ -1423,27 +1423,35 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
     // one snap point per card rest, plus one where the next section reaches the top, so a swipe from the last card
     // still leaves the section. Snapping is switched on only while the page is inside the stage, so the rest of the
     // page scrolls freely. scroll-snap-stop makes one swipe move exactly one card, however hard it is.
-    const marks = Array.from({ length: NW + 1 }, (_, k) => {
+    // plus one at the very top (the hero). Snapping runs from the top of the page, so a swipe from the hero always
+    // stops on card 1 first; if it only switched on inside the stage, a firm swipe's momentum carried past card 1.
+    const marks = Array.from({ length: NW + 2 }, (_, k) => {
       const m = document.createElement('i'); m.className = 'wsnap'; m.setAttribute('aria-hidden', 'true'); stage.appendChild(m); return m;
     });
-    let on = false, y0 = 0, y1 = 0, paused = false, pauseT = 0;
+    let on = false, y0 = 0, y1 = 0, paused = false, pauseT = 0, user = false, touching = false, idleT = 0;
     const place = () => {
       const len = stage.offsetHeight - innerHeight, total = NW - 1 + TAIL;
-      marks.forEach((m, k) => { m.style.top = (k < NW ? Math.round(k / total * len) : stage.offsetHeight) + 'px'; });
       const top = stage.getBoundingClientRect().top + scrollY; y0 = top; y1 = top + stage.offsetHeight;
+      marks.forEach((m, k) => { m.style.top = (k < NW ? Math.round(k / total * len) : k === NW ? stage.offsetHeight : -Math.round(top)) + 'px'; });
     };
     const toggle = () => {
-      const want = !paused && scrollY >= y0 - 2 && scrollY <= y1 + 2 && !$('#nav').classList.contains('menu-open');
+      // above the stage, snapping only runs during a person's own swipe (finger down, or the page still coasting
+      // from it), so a reload that restores the scroll position or any scripted scroll is never pulled to a card
+      const want = !paused && scrollY <= y1 + 2 && (scrollY >= y0 - 2 || user) && !$('#nav').classList.contains('menu-open');
       if (want !== on) { on = want; document.documentElement.classList.toggle('snap-works', on); }
     };
     window.__snapPause = () => {
-      paused = true; toggle(); clearTimeout(pauseT);
+      paused = true; user = false; clearTimeout(idleT); toggle(); clearTimeout(pauseT);   // a jump is not a swipe
       const end = () => { clearTimeout(pauseT); if (paused) { paused = false; toggle(); } };
       pauseT = setTimeout(end, 2500);   // safety net in case the glide is interrupted and never completes
       return end;
     };
+    const settle = () => { clearTimeout(idleT); idleT = setTimeout(() => { if (!touching) { user = false; toggle(); } }, 300); };
+    addEventListener('touchstart', () => { touching = user = true; clearTimeout(idleT); toggle(); }, { passive: true });
+    addEventListener('touchend', () => { touching = false; settle(); }, { passive: true });
+    addEventListener('touchcancel', () => { touching = false; settle(); }, { passive: true });
     place(); toggle();
-    addEventListener('scroll', toggle, { passive: true });
+    addEventListener('scroll', () => { if (user && !touching) settle(); toggle(); }, { passive: true });
     addEventListener('resize', () => { place(); toggle(); });
     addEventListener('load', () => { place(); toggle(); });
   }
