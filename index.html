@@ -505,6 +505,7 @@ html.snap-works{scroll-snap-type:y mandatory}
   .tslot{width:min(100%,calc((100svh - 220px) * 1.06))}
   .tc-quote{font-size:max(5.4cqw,16px)}
 }
+@media (min-width:601px){.tc-quote.long{font-size:4.4cqw}}   /* longer quotes (Ritwik) step down a size so the name keeps its breathing room */
 .testi.static .t-stage{height:auto}
 .testi.static .t-sticky{position:relative;height:auto;overflow:hidden;padding-bottom:96px}
 .testi.static .t-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:24px;perspective:none}
@@ -1059,6 +1060,18 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
       <ul class="t-cards">
         <li class="tslot">
           <figure class="tcard">
+            <img class="tc-img" src="img/testi/card3.jpg" alt="" loading="lazy" draggable="false">
+            <img class="tc-sharp" src="img/testi/card3.jpg" alt="" loading="lazy" draggable="false">
+            <span class="tc-veil" aria-hidden="true"></span><span class="tc-rise" aria-hidden="true"></span><span class="tc-glow" aria-hidden="true"></span><span class="tc-edge" aria-hidden="true"></span>
+            <div class="tc-body">
+              <span class="tc-mark" aria-hidden="true">“</span>
+              <blockquote class="tc-quote long">“I had the pleasure of managing Akash on my team. He is an exceptional designer with a remarkable ability to focus deeply on the task at hand. No matter how complex the user problem or system architecture, Akash consistently cut through the noise to deliver practical, well-crafted designs.”</blockquote>
+              <figcaption class="tc-who"><b class="tc-name">Ritwik</b><span class="tc-role">Team Lead</span></figcaption>
+            </div>
+          </figure>
+        </li>
+        <li class="tslot">
+          <figure class="tcard">
             <img class="tc-img" src="img/testi/card1.jpg" alt="" loading="lazy" draggable="false">
             <img class="tc-sharp" src="img/testi/card1.jpg" alt="" loading="lazy" draggable="false">
             <span class="tc-veil" aria-hidden="true"></span><span class="tc-rise" aria-hidden="true"></span><span class="tc-glow" aria-hidden="true"></span><span class="tc-edge" aria-hidden="true"></span>
@@ -1078,18 +1091,6 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
               <span class="tc-mark" aria-hidden="true">“</span>
               <blockquote class="tc-quote">“I’d highly recommend Akash for any project where good visual design, user experience, timely delivery, smooth coordination, less no. of revisions are required. Working on the same team as Akash, I could always rely on him for his quality of work and TAT.”</blockquote>
               <figcaption class="tc-who"><b class="tc-name">Shakshi</b><span class="tc-role">Marketing Head</span></figcaption>
-            </div>
-          </figure>
-        </li>
-        <li class="tslot">
-          <figure class="tcard">
-            <img class="tc-img" src="img/testi/card3.jpg" alt="" loading="lazy" draggable="false">
-            <img class="tc-sharp" src="img/testi/card3.jpg" alt="" loading="lazy" draggable="false">
-            <span class="tc-veil" aria-hidden="true"></span><span class="tc-rise" aria-hidden="true"></span><span class="tc-glow" aria-hidden="true"></span><span class="tc-edge" aria-hidden="true"></span>
-            <div class="tc-body">
-              <span class="tc-mark" aria-hidden="true">“</span>
-              <blockquote class="tc-quote">“Complex ideas became a clear, intuitive experience. The care, curiosity and attention to detail made the whole process feel effortless.”</blockquote>
-              <figcaption class="tc-who"><b class="tc-name">Jordan Ellis</b><span class="tc-role">Co-founder &amp; COO</span></figcaption>
             </div>
           </figure>
         </li>
