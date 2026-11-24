@@ -83,6 +83,29 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .links{position:relative;display:flex;gap:2px;padding:4px;border-radius:14px;background:rgba(231,255,237,.8);border:1px solid rgba(17,37,41,.12);
   -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:background var(--d-slow) var(--ease),border-color var(--d-slow) var(--ease)}
 .nav.on-dark .links{background:rgba(14,31,34,.78);border-color:rgba(200,255,217,.12)}
+/* progressive blur behind the nav (Liquid Glass style): stacked backdrop blurs, each masked to its own band, so the
+   blur ramps up towards the screen edge instead of stopping at a hard line. Top edge everywhere; on phones and tablets
+   the bottom edge too, behind the dock. A soft tint follows the section tone (mint or dark). */
+.pblur{position:fixed;left:0;right:0;z-index:44;pointer-events:none;height:var(--pb-h)}
+.pblur.top{top:0;--pb-h:calc(112px + env(safe-area-inset-top,0px));--pb-dir:to top}
+.pblur.bot{bottom:0;--pb-h:calc(118px + env(safe-area-inset-bottom,0px));--pb-dir:to bottom;display:none}
+.pblur i{position:absolute;inset:0;-webkit-backdrop-filter:blur(var(--b));backdrop-filter:blur(var(--b));
+  -webkit-mask:linear-gradient(var(--pb-dir),transparent var(--m0),#000 var(--m1),#000 var(--m2),transparent var(--m3));
+  mask:linear-gradient(var(--pb-dir),transparent var(--m0),#000 var(--m1),#000 var(--m2),transparent var(--m3))}
+.pblur i:nth-child(1){--b:.5px;--m0:0%;--m1:12.5%;--m2:25%;--m3:37.5%}
+.pblur i:nth-child(2){--b:1px;--m0:12.5%;--m1:25%;--m2:37.5%;--m3:50%}
+.pblur i:nth-child(3){--b:2px;--m0:25%;--m1:37.5%;--m2:50%;--m3:62.5%}
+.pblur i:nth-child(4){--b:4px;--m0:37.5%;--m1:50%;--m2:62.5%;--m3:75%}
+.pblur i:nth-child(5){--b:8px;--m0:50%;--m1:62.5%;--m2:75%;--m3:87.5%}
+.pblur i:nth-child(6){--b:16px;--m0:62.5%;--m1:75%;--m2:100%;--m3:100%}
+.pblur::before,.pblur::after{content:"";position:absolute;inset:0;transition:opacity var(--d-slow) var(--ease)}
+.pblur.top::before{background:linear-gradient(to bottom,rgba(231,255,237,.62),rgba(231,255,237,.28) 45%,rgba(231,255,237,0))}
+.pblur.top::after{background:linear-gradient(to bottom,rgba(6,18,23,.62),rgba(6,18,23,.26) 45%,rgba(6,18,23,0));opacity:0}
+.nav.on-dark ~ .pblur.top::before{opacity:0}
+.nav.on-dark ~ .pblur.top::after{opacity:1}
+.pblur.bot::before{background:linear-gradient(to top,rgba(6,18,23,.16),rgba(6,18,23,0))}
+@media (max-width:899px){.pblur.bot{display:block}.pblur.top{--pb-h:calc(88px + env(safe-area-inset-top,0px))}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.pblur i{display:none}}
 .links a{position:relative;z-index:1;padding:10px 14px;border-radius:10px;font:500 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted-400);white-space:nowrap;transition:color var(--d) var(--ease)}
 .links a:hover{color:var(--deep-500)}
 .nav.on-dark .links a{color:var(--grey-800)}
@@ -882,6 +905,8 @@ if (!SHOW_TESTIMONIALS) document.documentElement.classList.add('no-testi');
     <span class="mm-soc"><a href="https://www.linkedin.com/in/akashuiuxdesigner" target="_blank" rel="noopener">LinkedIn</a><a href="https://dribbble.com/Akashcreatives" target="_blank" rel="noopener">Dribbble</a><a href="https://www.behance.net/akashskumar6" target="_blank" rel="noopener">Behance</a></span>
   </div>
 </div>
+<div class="pblur top" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="pblur bot" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 
 <main>
 <!-- 00 HERO -->

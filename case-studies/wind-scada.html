@@ -40,7 +40,26 @@ svg .m{font-family:var(--f-mono)} svg .b{font-family:var(--f-body)}
 
 /* nav: same bar as the home page, without the section tracker */
 .nav{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:calc(16px + env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) 16px max(24px,env(safe-area-inset-left,0px));
-  background:linear-gradient(var(--neon-50) 70%,rgba(220,255,229,0))}
+  background:none}
+/* progressive blur behind the nav (Liquid Glass style), same as the home page: stacked backdrop blurs, each masked
+   to its own band, ramping up towards the screen edge. Bottom edge too on phones and tablets, behind the dock. */
+.pblur{position:fixed;left:0;right:0;z-index:39;pointer-events:none;height:var(--pb-h)}
+.pblur.top{top:0;--pb-h:calc(104px + env(safe-area-inset-top,0px));--pb-dir:to top}
+.pblur.bot{bottom:0;--pb-h:calc(118px + env(safe-area-inset-bottom,0px));--pb-dir:to bottom;display:none}
+.pblur i{position:absolute;inset:0;-webkit-backdrop-filter:blur(var(--b));backdrop-filter:blur(var(--b));
+  -webkit-mask:linear-gradient(var(--pb-dir),transparent var(--m0),#000 var(--m1),#000 var(--m2),transparent var(--m3));
+  mask:linear-gradient(var(--pb-dir),transparent var(--m0),#000 var(--m1),#000 var(--m2),transparent var(--m3))}
+.pblur i:nth-child(1){--b:.5px;--m0:0%;--m1:12.5%;--m2:25%;--m3:37.5%}
+.pblur i:nth-child(2){--b:1px;--m0:12.5%;--m1:25%;--m2:37.5%;--m3:50%}
+.pblur i:nth-child(3){--b:2px;--m0:25%;--m1:37.5%;--m2:50%;--m3:62.5%}
+.pblur i:nth-child(4){--b:4px;--m0:37.5%;--m1:50%;--m2:62.5%;--m3:75%}
+.pblur i:nth-child(5){--b:8px;--m0:50%;--m1:62.5%;--m2:75%;--m3:87.5%}
+.pblur i:nth-child(6){--b:16px;--m0:62.5%;--m1:75%;--m2:100%;--m3:100%}
+.pblur::before{content:"";position:absolute;inset:0}
+.pblur.top::before{background:linear-gradient(to bottom,rgba(231,255,237,.62),rgba(231,255,237,.28) 45%,rgba(231,255,237,0))}
+.pblur.bot::before{background:linear-gradient(to top,rgba(6,18,23,.16),rgba(6,18,23,0))}
+@media (max-width:899px){.pblur.bot{display:block}.pblur.top{--pb-h:calc(88px + env(safe-area-inset-top,0px))}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.pblur i{display:none}}
 .brand{font:500 12px/1.2 var(--f-mono);padding:6px 4px}
 .links{display:flex;gap:2px;padding:4px;border-radius:14px;background:rgba(231,255,237,.8);border:1px solid rgba(17,37,41,.12)}
 .links a{padding:10px 14px;border-radius:10px;font:500 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted-400);white-space:nowrap;transition:color .3s var(--ease)}
@@ -610,6 +629,8 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
     <span class="mm-soc"><a href="https://www.linkedin.com/in/akashuiuxdesigner" target="_blank" rel="noopener">LinkedIn</a><a href="https://dribbble.com/Akashcreatives" target="_blank" rel="noopener">Dribbble</a><a href="https://www.behance.net/akashskumar6" target="_blank" rel="noopener">Behance</a></span>
   </div>
 </div>
+<div class="pblur top" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="pblur bot" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 <main class="cs" id="main">
   <div class="col head">
     <a class="back" href="../index.html#work"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg>Back</a>
