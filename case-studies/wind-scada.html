@@ -81,7 +81,13 @@ svg .m{font-family:var(--f-mono)} svg .b{font-family:var(--f-body)}
 .menu-open .mt-i i:last-child{transform:rotate(-45deg)}
 .mmenu{display:none}
 /* WhatsApp "Say hi" key: phones + tablets only, in the dock next to Resume (the menu key moved up to the top bar) */
-.btn.wa{display:none}   /* Keycap CTA, same anatomy as Resume: label, then chip with the WhatsApp glyph */
+.btn.wa{display:none}   /* Keycap CTA, dark variant: same anatomy as Resume (label, then chip) with the colours inverted */
+.btn.wa{--edge:var(--deep-900);background:linear-gradient(180deg,rgba(200,255,217,.12),rgba(200,255,217,0) 55%),var(--deep-500);color:var(--neon-50);
+  box-shadow:0 4px 0 var(--edge),0 14px 26px -12px rgba(9,22,25,.7),inset 0 1px 0 rgba(200,255,217,.18)}
+.btn.wa:active{box-shadow:0 1px 0 var(--edge),0 6px 14px -8px rgba(9,22,25,.6),inset 0 1px 0 rgba(200,255,217,.14)}
+.btn.wa .chip{background:var(--neon);color:var(--deep-500)}
+.nav .btn.wa:hover{box-shadow:0 6px 0 var(--edge),0 18px 30px -12px rgba(9,22,25,.8),inset 0 1px 0 rgba(200,255,217,.18)}
+.nav.dock-dark .btn.wa{box-shadow:0 4px 0 #000,0 14px 26px -12px rgba(0,0,0,.7),inset 0 1px 0 rgba(200,255,217,.18),0 0 0 1px rgba(200,255,217,.16)}
 .mtog:focus-visible{outline:2px solid var(--neon);outline-offset:3px}
 @media (max-width:899px){
   .links{display:none}
