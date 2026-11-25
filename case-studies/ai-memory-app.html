@@ -489,7 +489,6 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 .contact .footer .wrap{position:relative}
 .fbar .legal{margin:0;display:flex;flex-wrap:wrap;gap:4px 14px;font:400 12px/1.4 var(--f-mono);color:var(--muted-200)}
 .fbar .legal span{color:var(--neon-100)}
-.btn.totop{--ax:0;--ay:-1}
 .foot-row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 24px;align-items:flex-end}
 .legal{font:400 11px/1.4 var(--f-mono);color:var(--neon-900)}
 /* keys drop onto the sheet one after another the first time it shows */
@@ -518,17 +517,6 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 @keyframes blink{50%{opacity:0}}
 @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 .band{position:relative;padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
-.totop .pill{display:block;height:1.2em;line-height:1.2;overflow:hidden}
-.totop .lbl{display:block!important;position:relative;transition:transform .45s var(--ease)}
-.totop .lbl::after{content:attr(data-t);position:absolute;left:0;top:100%}
-.totop:hover .lbl{transform:translateY(-100%)}
-.totop{padding-left:16px!important}
-.totop .chip{overflow:hidden}
-.totop .arw{position:relative;width:16px;height:16px}
-.totop .arw svg{position:absolute;inset:0;transition:transform .45s var(--ease)}
-.totop .arw svg:last-child{transform:translate(0,170%)}
-.totop:hover .arw svg:first-child{transform:translate(0,-170%)}
-.totop:hover .arw svg:last-child{transform:none}
 /* next + footer */
 .next{padding:clamp(56px,8vw,96px) 0 clamp(64px,10vw,120px)}
 .next .eb{color:var(--grey-800)}
@@ -589,6 +577,35 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 @media (max-width:899px){.live .lv-head{grid-template-columns:1fr}.lv-bar > i{display:none}.lv-url{margin:0}.lv-live{margin-left:auto}.slide .lv-btn .lbl{display:block}.lv-btn{padding-left:16px}}
 @media (prefers-reduced-motion:reduce){.lv-live b{animation:none}.lv-win{transition:none}}
 .spark{position:fixed;inset:0;width:100%;height:100%;z-index:70;pointer-events:none}
+/* Back to top: a quiet floating arrow at the right edge, not a CTA. Appears after the first screen;
+   the ring fills with scroll progress. Hover (mouse) reveals the label and loops the arrow. */
+.totop-f{position:fixed;z-index:44;right:max(24px, env(safe-area-inset-right,0px));bottom:max(24px, env(safe-area-inset-bottom,0px));width:52px;height:52px;border-radius:50%;
+  display:grid;place-items:center;color:var(--neon);background:rgba(9,22,25,.74);-webkit-backdrop-filter:blur(12px) saturate(1.4);backdrop-filter:blur(12px) saturate(1.4);
+  box-shadow:0 12px 28px -14px rgba(0,0,0,.6);opacity:0;visibility:hidden;transform:translateY(14px) scale(.9);
+  transition:opacity .35s var(--ease),transform .35s var(--ease),background .2s var(--ease),visibility 0s linear .35s}
+.totop-f.on{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+.tt-ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.tt-ring circle{fill:none;stroke-width:1.5}
+.tt-track{stroke:rgba(200,255,217,.18)}
+.tt-prog{stroke:var(--neon);stroke-dasharray:100;stroke-dashoffset:100;stroke-linecap:round}
+.tt-arw{position:relative;width:16px;height:16px;overflow:hidden}
+.tt-arw svg{position:absolute;inset:0;transition:transform .45s var(--ease)}
+.tt-arw svg:last-child{transform:translateY(170%)}
+.tt-lbl{position:absolute;right:calc(100% + 10px);top:50%;padding:7px 10px;border-radius:8px;background:var(--deep-500);color:var(--neon-50);font:500 12px/1 var(--f-mono);white-space:nowrap;
+  opacity:0;transform:translate(6px,-50%);pointer-events:none;transition:opacity .25s var(--ease),transform .25s var(--ease)}
+@media (hover:hover){
+  .totop-f:hover{background:rgba(9,22,25,.92)}
+  .totop-f:hover .tt-arw svg:first-child{transform:translateY(-170%)}
+  .totop-f:hover .tt-arw svg:last-child{transform:none}
+  .totop-f:hover .tt-lbl{opacity:1;transform:translate(0,-50%)}
+}
+.totop-f:focus-visible{outline:2px solid var(--neon);outline-offset:3px}
+.totop-f:focus-visible .tt-lbl{opacity:1;transform:translate(0,-50%)}
+.nav.menu-open ~ .totop-f{opacity:0;visibility:hidden}
+@media (max-width:899px){
+  .totop-f{right:max(16px, env(safe-area-inset-right,0px));bottom:calc(92px + env(safe-area-inset-bottom,0px));width:46px;height:46px}   /* sits just above the dock */
+  .fbar .legal{padding-right:62px}   /* keep the footer credit clear of the arrow */
+}
 </style>
 <style>
 .bl-cover img{display:block;width:100%;height:auto;border-radius:16px}
@@ -736,6 +753,7 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 </div>
 <div class="pblur top" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 <div class="pblur bot" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<a class="totop-f" href="#top" aria-label="Back to top"><span class="tt-lbl" aria-hidden="true">Back to top</span><svg class="tt-ring" viewBox="0 0 52 52" aria-hidden="true"><circle class="tt-track" cx="26" cy="26" r="25"/><circle class="tt-prog" cx="26" cy="26" r="25" pathLength="100"/></svg><span class="tt-arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 13.5V3M3.5 7.5L8 3l4.5 4.5" stroke="currentColor" stroke-width="1.5"/></svg><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 13.5V3M3.5 7.5L8 3l4.5 4.5" stroke="currentColor" stroke-width="1.5"/></svg></span></a>
 <main class="cs" id="main">
   <div class="col head">
     <a class="back" href="../index.html#work"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 8H13M8.5 12.5L13 8L8.5 3.5" stroke="currentColor" stroke-width="1.5"/></svg>Back</a>
@@ -813,7 +831,7 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
         </ul>
         <span class="ktoast" id="ktoast" role="status" aria-live="polite"></span>
       </div>
-      <div class="foot-row fbar"><p class="legal">© 2026 Akash S Kumar<span>Designed in Figma, built with Claude Code.</span></p><a class="btn totop" href="#top"><span class="pill"><span class="lbl" data-t="Back to top">Back to top</span></span><span class="chip"><span class="arw"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.8l5.6 6.1H9.7v6.3H6.3V7.9H2.4z"/></svg><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.8l5.6 6.1H9.7v6.3H6.3V7.9H2.4z"/></svg></span></span></a></div>
+      <div class="foot-row fbar"><p class="legal">© 2026 Akash S Kumar<span>Designed in Figma, built with Claude Code.</span></p></div>
     </div>
   </footer>
 </section>
@@ -981,7 +999,7 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
 <script>
 (() => {
   const top = document.getElementById('top');
-  document.querySelectorAll('a.totop').forEach(a => a.addEventListener('click', e => {
+  document.querySelectorAll('a.totop, a.totop-f').forEach(a => a.addEventListener('click', e => {
     e.preventDefault();
     const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (window.lenis && window.lenis.scrollTo) window.lenis.scrollTo(0, { immediate: !smooth });
@@ -1114,6 +1132,17 @@ h1{font:500 clamp(36px,5vw,58px)/1 var(--f-display);letter-spacing:-.025em;margi
       if (alive) raf = requestAnimationFrame(draw); else { running = false; ctx.clearRect(0, 0, innerWidth, innerHeight); }
     };
   }
+})();
+</script>
+<script>
+/* Back to top: show after the first screen, fill the ring with scroll progress */
+(() => {
+  const b = document.querySelector('.totop-f'); if (!b) return;
+  const ring = b.querySelector('.tt-prog'); let tk = 0;
+  const up = () => { tk = 0; const h = document.documentElement.scrollHeight - innerHeight, y = scrollY;
+    ring.style.strokeDashoffset = 100 - (h > 0 ? Math.min(1, y / h) : 0) * 100; b.classList.toggle('on', y > innerHeight * .8); };
+  addEventListener('scroll', () => { if (!tk) tk = requestAnimationFrame(up); }, { passive: true });
+  addEventListener('resize', up); up();
 })();
 </script>
 </body>
